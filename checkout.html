@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إتمام الطلب - ستايل مان</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="top-bar">🔒 جميع المعاملات مشفرة وآمنة بالكامل</div>
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon"><i class="fas fa-tshirt"></i></div>
+        <div class="logo-text"><strong>ستايل مان</strong><span>STYLE MAN</span></div>
+      </a>
+      <div class="navbar-actions">
+        <a href="cart.html" class="nav-icon-btn">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="cart-badge cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>إتمام الطلب</h1>
+    <div class="breadcrumb">
+      <a href="index.html">الرئيسية</a>
+      <i class="fas fa-chevron-left" style="font-size:0.7rem"></i>
+      <a href="cart.html">السلة</a>
+      <i class="fas fa-chevron-left" style="font-size:0.7rem"></i>
+      <span>الدفع</span>
+    </div>
+  </div>
+</div>
+
+<section class="checkout-page">
+  <div class="container">
+    <form id="checkout-form">
+    <div class="checkout-layout">
+      <div class="checkout-form-section">
+        <div class="checkout-step">
+          <div class="step-header">
+            <div class="step-num">1</div>
+            <h3>بيانات الشحن</h3>
+          </div>
+          <div class="step-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>الاسم الأول *</label>
+                <input type="text" placeholder="محمد" required>
+              </div>
+              <div class="form-group">
+                <label>الاسم الأخير *</label>
+                <input type="text" placeholder="أحمد" required>
+              </div>
+              <div class="form-group">
+                <label>رقم الهاتف *</label>
+                <input type="tel" placeholder="01xxxxxxxxx" required>
+              </div>
+              <div class="form-group">
+                <label>البريد الإلكتروني</label>
+                <input type="email" placeholder="example@email.com">
+              </div>
+              <div class="form-group">
+                <label>المحافظة *</label>
+                <select required>
+                  <option value="">اختر المحافظة</option>
+                  <option>القاهرة</option>
+                  <option>الجيزة</option>
+                  <option>الإسكندرية</option>
+                  <option>المنصورة</option>
+                  <option>الإسماعيلية</option>
+                  <option>أسيوط</option>
+                  <option>سوهاج</option>
+                  <option>الأقصر</option>
+                  <option>أسوان</option>
+                  <option>شرم الشيخ</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>المدينة / المنطقة *</label>
+                <input type="text" placeholder="المدينة" required>
+              </div>
+              <div class="form-group full-width">
+                <label>العنوان بالتفصيل *</label>
+                <input type="text" placeholder="اسم الشارع، رقم المبنى، الشقة" required>
+              </div>
+              <div class="form-group full-width">
+                <label>ملاحظات إضافية</label>
+                <textarea rows="3" placeholder="أي تعليمات خاصة للتوصيل..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="checkout-step" style="border-top:1px solid #eee">
+          <div class="step-header">
+            <div class="step-num">2</div>
+            <h3>طريقة الدفع</h3>
+          </div>
+          <div class="step-body">
+            <div class="payment-methods">
+              <label class="payment-method selected">
+                <input type="radio" name="payment" value="cod" checked>
+                <span class="payment-icon">💵</span>
+                <div class="payment-method-info">
+                  <strong>الدفع عند الاستلام</strong>
+                  <span>ادفع نقداً عند وصول الطلب لبابك</span>
+                </div>
+              </label>
+              <label class="payment-method">
+                <input type="radio" name="payment" value="fawry">
+                <span class="payment-icon">💳</span>
+                <div class="payment-method-info">
+                  <strong>فوري</strong>
+                  <span>ادفع عبر فوري في أقرب نقطة</span>
+                </div>
+              </label>
+              <label class="payment-method">
+                <input type="radio" name="payment" value="vodafone">
+                <span class="payment-icon">📱</span>
+                <div class="payment-method-info">
+                  <strong>فودافون كاش / انستا باي</strong>
+                  <span>تحويل مباشر عبر المحفظة الإلكترونية</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="step-body">
+          <button type="submit" class="btn btn-primary place-order-btn">
+            <i class="fas fa-check-circle"></i> تأكيد الطلب
+          </button>
+        </div>
+      </div>
+
+      <div class="order-summary">
+        <div class="order-summary-header">ملخص طلبك</div>
+        <div class="order-summary-body">
+          <div id="checkout-items-list" style="margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #eee;font-size:0.9rem"></div>
+          <div class="summary-row"><span>المجموع الجزئي</span><span id="summary-subtotal">0 ج.م</span></div>
+          <div class="summary-row"><span>الشحن</span><span id="summary-shipping">50 ج.م</span></div>
+          <div class="summary-row total"><span>الإجمالي</span><span id="checkout-total">0 ج.م</span></div>
+          <div style="margin-top:20px;padding:15px;background:#f8f8f8;border-radius:8px;font-size:0.82rem;color:#666">
+            <i class="fas fa-shield-alt" style="color:#28a745"></i> جميع بياناتك محمية ومشفرة
+          </div>
+        </div>
+      </div>
+    </div>
+    </form>
+  </div>
+</section>
+
+<div class="success-modal" id="success-modal">
+  <div class="success-modal-content">
+    <div class="success-icon"><i class="fas fa-check"></i></div>
+    <h2>تم تأكيد طلبك! 🎉</h2>
+    <p>شكراً لثقتك في ستايل مان! سيتم التواصل معك خلال 24 ساعة لتأكيد موعد التوصيل.</p>
+    <div class="order-number">
+      <strong>رقم الطلب: </strong>
+      <span id="order-number-display">#000000</span>
+    </div>
+    <button id="success-btn" class="btn btn-primary" style="width:100%;justify-content:center">
+      <i class="fas fa-home"></i> العودة للرئيسية
+    </button>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const list = document.getElementById("checkout-items-list");
+  if (list) {
+    if (cart.length === 0) {
+      list.innerHTML = "<p style=\"color:#999;text-align:center\">السلة فارغة</p>";
+    } else {
+      list.innerHTML = cart.map(item =>
+        `<div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span>${item.name} × ${item.qty}</span>
+          <span>${formatPrice(item.price * item.qty)}</span>
+        </div>`
+      ).join("");
+    }
+  }
+  document.querySelectorAll(".payment-method").forEach(m => {
+    m.addEventListener("click", function() {
+      document.querySelectorAll(".payment-method").forEach(x => x.classList.remove("selected"));
+      this.classList.add("selected");
+    });
+  });
+});
+</script>
+</body>
+</html>
