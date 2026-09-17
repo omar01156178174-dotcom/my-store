@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سلة الشراء - ستايل مان</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="top-bar">🚚 شحن مجاني على الطلبات فوق <span>500 جنيه</span></div>
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon"><i class="fas fa-tshirt"></i></div>
+        <div class="logo-text"><strong>ستايل مان</strong><span>STYLE MAN</span></div>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="index.html">الرئيسية</a></li>
+        <li><a href="shop.html">المتجر</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <a href="cart.html" class="nav-icon-btn">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="cart-badge cart-count">0</span>
+        </a>
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="mobile-menu-overlay"></div>
+<div class="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="navbar-logo">
+      <div class="logo-icon"><i class="fas fa-tshirt"></i></div>
+      <div class="logo-text"><strong style="color:white">ستايل مان</strong></div>
+    </div>
+    <button class="mobile-menu-close"><i class="fas fa-times"></i></button>
+  </div>
+  <nav>
+    <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+    <a href="shop.html"><i class="fas fa-store"></i> المتجر</a>
+    <a href="cart.html"><i class="fas fa-shopping-cart"></i> السلة</a>
+  </nav>
+</div>
+
+<div class="page-header">
+  <div class="container">
+    <h1>سلة الشراء</h1>
+    <div class="breadcrumb">
+      <a href="index.html">الرئيسية</a>
+      <i class="fas fa-chevron-left" style="font-size:0.7rem"></i>
+      <span>سلة الشراء</span>
+    </div>
+  </div>
+</div>
+
+<section class="cart-page">
+  <div class="container">
+    <div class="cart-layout">
+      <div class="cart-items-section">
+        <div class="cart-header">
+          <i class="fas fa-shopping-cart"></i>
+          <span>منتجاتك (<span id="cart-count-text">0 منتجات</span>)</span>
+        </div>
+        <div id="cart-items-list"></div>
+      </div>
+      <div class="order-summary">
+        <div class="order-summary-header">ملخص الطلب</div>
+        <div class="order-summary-body">
+          <div class="summary-row"><span>المجموع الجزئي</span><span id="summary-subtotal">0 ج.م</span></div>
+          <div class="summary-row"><span>الشحن</span><span id="summary-shipping">50 ج.م</span></div>
+          <div class="summary-row total"><span>الإجمالي</span><span id="summary-total">0 ج.م</span></div>
+          <div class="coupon-section">
+            <h4><i class="fas fa-tag"></i> كوبون الخصم</h4>
+            <div class="coupon-input-group">
+              <input type="text" placeholder="أدخل الكود" id="coupon-input">
+              <button id="apply-coupon">تطبيق</button>
+            </div>
+          </div>
+          <a href="checkout.html" class="btn btn-primary checkout-btn">
+            <i class="fas fa-credit-card"></i> إتمام الطلب
+          </a>
+          <a href="shop.html" class="continue-shopping">← متابعة التسوق</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-bottom" style="padding-top:30px;border-top:1px solid rgba(255,255,255,0.08)">
+      <p>© 2026 <span>ستايل مان</span>. جميع الحقوق محفوظة.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
