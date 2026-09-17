@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المتجر - ستايل مان</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="top-bar">🚚 شحن مجاني على الطلبات فوق <span>500 جنيه</span> | كود الخصم: <span>SALE20</span></div>
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon"><i class="fas fa-tshirt"></i></div>
+        <div class="logo-text"><strong>ستايل مان</strong><span>STYLE MAN</span></div>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="index.html">الرئيسية</a></li>
+        <li><a href="shop.html" class="active">المتجر</a></li>
+        <li><a href="shop.html?cat=tshirts">تيشيرتات</a></li>
+        <li><a href="shop.html?cat=pants">بناطيل</a></li>
+        <li><a href="shop.html?cat=jackets">جاكيتات</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <a href="cart.html" class="nav-icon-btn">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="cart-badge cart-count">0</span>
+        </a>
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="mobile-menu-overlay"></div>
+<div class="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="navbar-logo">
+      <div class="logo-icon"><i class="fas fa-tshirt"></i></div>
+      <div class="logo-text"><strong style="color:white">ستايل مان</strong></div>
+    </div>
+    <button class="mobile-menu-close"><i class="fas fa-times"></i></button>
+  </div>
+  <nav>
+    <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+    <a href="shop.html"><i class="fas fa-store"></i> المتجر</a>
+    <a href="cart.html"><i class="fas fa-shopping-cart"></i> السلة</a>
+  </nav>
+</div>
+
+<div class="page-header">
+  <div class="container">
+    <h1>المتجر</h1>
+    <div class="breadcrumb">
+      <a href="index.html">الرئيسية</a>
+      <i class="fas fa-chevron-left" style="font-size:0.7rem"></i>
+      <span>المتجر</span>
+    </div>
+  </div>
+</div>
+
+<section class="shop-page">
+  <div class="container">
+    <div class="shop-layout">
+      <aside class="shop-filters">
+        <div class="filter-header">
+          <h3><i class="fas fa-sliders-h"></i> تصفية</h3>
+          <button class="filter-clear">مسح الكل</button>
+        </div>
+        <div class="filter-group">
+          <h4>الفئة</h4>
+          <label class="filter-option"><input type="checkbox" data-cat="tshirts"><label>تيشيرتات</label><span class="count">3</span></label>
+          <label class="filter-option"><input type="checkbox" data-cat="pants"><label>بناطيل</label><span class="count">3</span></label>
+          <label class="filter-option"><input type="checkbox" data-cat="jackets"><label>جاكيتات</label><span class="count">2</span></label>
+          <label class="filter-option"><input type="checkbox" data-cat="shirts"><label>قمصان</label><span class="count">2</span></label>
+        </div>
+        <div class="filter-group">
+          <h4>نطاق السعر <small style="color:var(--text-light);font-weight:400;font-size:0.8rem" id="price-label">0 - 2000 ج.م</small></h4>
+          <div style="margin-bottom:12px">
+            <input type="range" id="price-range" min="0" max="2000" value="2000"
+              style="width:100%;accent-color:var(--accent);cursor:pointer">
+          </div>
+          <div class="price-range">
+            <div style="flex:1;text-align:center">
+              <div style="font-size:0.75rem;color:var(--text-light);margin-bottom:4px">من</div>
+              <input type="number" class="price-input" id="price-min" value="0" min="0" max="2000" readonly
+                style="background:var(--light);color:var(--primary);font-weight:700">
+            </div>
+            <span style="padding-top:20px;color:var(--text-light)">-</span>
+            <div style="flex:1;text-align:center">
+              <div style="font-size:0.75rem;color:var(--text-light);margin-bottom:4px">إلى</div>
+              <input type="number" class="price-input" id="price-max" value="2000" min="0" max="2000" readonly
+                style="background:var(--light);color:var(--primary);font-weight:700">
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h4>المقاس</h4>
+          <div class="size-options">
+            <button class="size-btn">S</button>
+            <button class="size-btn">M</button>
+            <button class="size-btn">L</button>
+            <button class="size-btn">XL</button>
+            <button class="size-btn">XXL</button>
+          </div>
+        </div>
+      </aside>
+      <div class="shop-products">
+        <div class="shop-toolbar">
+          <p>يوجد <span id="products-count">10</span> منتجات</p>
+          <div class="toolbar-right">
+            <select id="sort-select" class="sort-select">
+              <option value="default">الترتيب الافتراضي</option>
+              <option value="price-asc">السعر: الأقل أولاً</option>
+              <option value="price-desc">السعر: الأعلى أولاً</option>
+              <option value="newest">الأحدث</option>
+              <option value="rating">الأعلى تقييماً</option>
+            </select>
+            <div class="view-toggle">
+              <button class="view-btn active" data-view="grid" title="عرض شبكي"><i class="fas fa-th"></i></button>
+              <button class="view-btn" data-view="list" title="عرض قائمة"><i class="fas fa-list"></i></button>
+            </div>
+          </div>
+        </div>
+        <div id="products-container"></div>
+        <div class="pagination">
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-bottom" style="padding-top:30px;border-top:1px solid rgba(255,255,255,0.08)">
+      <p>© 2026 <span>ستايل مان</span>. جميع الحقوق محفوظة.</p>
+      <div class="payment-icons">
+        <span>VISA</span><span>Mastercard</span><span>Fawry</span><span>COD</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get("cat");
+  if (cat) {
+    const cb = document.querySelector(`input[data-cat="${cat}"]`);
+    if (cb) { cb.checked = true; }
+  }
+
+  // Price range slider
+  const slider = document.getElementById("price-range");
+  const minInput = document.getElementById("price-min");
+  const maxInput = document.getElementById("price-max");
+  const label = document.getElementById("price-label");
+  if (slider) {
+    slider.addEventListener("input", function() {
+      const val = parseInt(this.value);
+      maxInput.value = val;
+      label.textContent = "0 - " + val.toLocaleString("ar-EG") + " ج.م";
+    });
+  }
+});
+</script>
+</body>
+</html>
