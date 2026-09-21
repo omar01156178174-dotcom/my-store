@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -65,6 +65,9 @@
       <div class="product-gallery">
         <img id="main-product-img" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80" alt="المنتج" class="main-img">
         <div class="product-thumbnails" id="product-thumbs"></div>
+        <button type="button" class="btn-virtual-tryon-trigger" onclick="openTryOnModal()">
+          <i class="fas fa-camera-retro"></i> 🪞 جرب الهودي عليك بالذكاء الاصطناعي (Try-On)
+        </button>
       </div>
       <div class="product-detail-info">
         <div class="product-category" id="product-detail-category">تيشيرتات</div>
@@ -79,7 +82,12 @@
           <span class="discount-tag" id="product-detail-discount" style="display:none"></span>
         </div>
         <p id="product-detail-desc" style="color:#666;line-height:1.8;margin-bottom:25px"></p>
-        <div class="option-label">المقاس: <span id="selected-size-label"></span></div>
+        <div class="size-header-wrapper">
+          <div class="option-label" style="margin-bottom:0">المقاس: <span id="selected-size-label"></span></div>
+          <button type="button" class="btn-ai-fit-trigger" onclick="openAiFitModal()">
+            <i class="fas fa-magic"></i> احسب مقاسك بالذكاء الاصطناعي
+          </button>
+        </div>
         <div class="sizes-selector" id="sizes-container"></div>
         <div class="option-label">اللون: <span id="selected-color-label"></span></div>
         <div class="colors-selector" id="colors-container"></div>
@@ -112,8 +120,174 @@
   </div>
 </footer>
 
+<!-- نافذة مستشار المقاس بالذكاء الاصطناعي -->
+<div class="ai-modal-overlay" id="ai-fit-modal">
+  <div class="ai-modal-container">
+    <div class="ai-modal-header">
+      <div class="ai-modal-header-title">
+        <i class="fas fa-robot"></i>
+        <div>
+          <h3>مستشار المقاس الذكي</h3>
+          <span>خوارزمية ذكية لاختيار المقاس المظبوط لجسمك</span>
+        </div>
+      </div>
+      <button class="ai-modal-close" onclick="closeAiFitModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ai-modal-body">
+      <!-- الطول -->
+      <div class="ai-slider-wrapper">
+        <div class="ai-slider-header">
+          <span>📏 طولك كام؟</span>
+          <span class="ai-slider-val" id="ai-height-display">175 سم</span>
+        </div>
+        <input type="range" class="ai-range-input" id="ai-height-input" min="140" max="210" value="175" oninput="updateFitSliders()">
+      </div>
+
+      <!-- الوزن -->
+      <div class="ai-slider-wrapper">
+        <div class="ai-slider-header">
+          <span>⚖️ وزنك كام؟</span>
+          <span class="ai-slider-val" id="ai-weight-display">75 كجم</span>
+        </div>
+        <input type="range" class="ai-range-input" id="ai-weight-input" min="40" max="150" value="75" oninput="updateFitSliders()">
+      </div>
+
+      <!-- شكل الجسم -->
+      <div style="margin-bottom: 15px;">
+        <label style="font-weight: 700; color: var(--primary); font-size: 0.92rem; display: block; margin-bottom: 8px;">👤 طبيعة جسمك:</label>
+        <div class="ai-tile-group">
+          <label class="ai-tile-label">
+            <input type="radio" name="body-shape" value="slim">
+            <i class="fas fa-male"></i>
+            <span>نحيف</span>
+          </label>
+          <label class="ai-tile-label">
+            <input type="radio" name="body-shape" value="average" checked>
+            <i class="fas fa-user"></i>
+            <span>متوسط</span>
+          </label>
+          <label class="ai-tile-label">
+            <input type="radio" name="body-shape" value="athletic">
+            <i class="fas fa-dumbbell"></i>
+            <span>رياضي / كتاف</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- تفضيل القصة -->
+      <div style="margin-bottom: 22px;">
+        <label style="font-weight: 700; color: var(--primary); font-size: 0.92rem; display: block; margin-bottom: 8px;">🔥 بتحب تلبس الهودي إزاي؟</label>
+        <div class="ai-tile-group">
+          <label class="ai-tile-label">
+            <input type="radio" name="fit-pref" value="oversize" checked>
+            <i class="fas fa-tshirt"></i>
+            <span>أوفرسايز واسع</span>
+          </label>
+          <label class="ai-tile-label">
+            <input type="radio" name="fit-pref" value="regular">
+            <i class="fas fa-check"></i>
+            <span>مظبوط Regular</span>
+          </label>
+          <label class="ai-tile-label">
+            <input type="radio" name="fit-pref" value="slim">
+            <i class="fas fa-compress-alt"></i>
+            <span>سليم ماسك</span>
+          </label>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 1rem; font-weight: 800;" onclick="calculateAiSize()">
+        <i class="fas fa-magic"></i> احسب مقاسي المناسب الآن
+      </button>
+
+      <!-- صندوق النتيجة -->
+      <div class="ai-result-box" id="ai-result-box">
+        <div class="ai-result-header">
+          <div>
+            <div style="font-size: 0.82rem; color: rgba(255,255,255,0.7); margin-bottom: 4px;">المقاس الأنسب لك بالذكاء الاصطناعي:</div>
+            <span class="ai-confidence-pill" id="ai-confidence-badge">دقة التطابق 98%</span>
+          </div>
+          <div class="ai-recommended-badge" id="ai-recommended-size">L</div>
+        </div>
+        <p class="ai-explanation" id="ai-explanation-text"></p>
+        <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center; font-weight: 800;" onclick="applyAiSizeToProduct()">
+          <i class="fas fa-check-circle"></i> اختيار وتطبيق هذا المقاس للمنتج
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة غرفة القياس الافتراضية (Virtual Try-On) -->
+<div class="ai-modal-overlay" id="virtual-tryon-modal">
+  <div class="ai-modal-container" style="max-width: 500px;">
+    <div class="ai-modal-header">
+      <div class="ai-modal-header-title">
+        <i class="fas fa-camera"></i>
+        <div>
+          <h3>غرفة القياس الافتراضية</h3>
+          <span>شوف شكلك بالهودي قبل ما تشتريه</span>
+        </div>
+      </div>
+      <button class="ai-modal-close" onclick="closeTryOnModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ai-modal-body">
+      <div class="tryon-viewport-container">
+        <!-- منطقة الرفع المبدئية -->
+        <div class="tryon-upload-prompt" id="tryon-placeholder" onclick="document.getElementById('user-photo-upload').click()">
+          <div class="tryon-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <h4 style="color: var(--primary); margin: 0; font-size: 1.05rem;">ارفع صورتك للمعاينة الفورية</h4>
+          <p style="color: var(--text-light); font-size: 0.82rem; margin: 0;">يفضل صورة واضحة لنصف الجسم أو كاملة لمطابقة دقيقة</p>
+          <button type="button" class="btn btn-dark" style="margin-top: 5px;"><i class="fas fa-upload"></i> اختر صورة من جهازك</button>
+        </div>
+        <input type="file" id="user-photo-upload" accept="image/*" style="display: none;" onchange="handleUserPhotoUpload(event)">
+        <!-- كانفاس المعاينة -->
+        <canvas id="tryon-canvas"></canvas>
+      </div>
+
+      <!-- شريط التحكم التفاعلي بالهودي -->
+      <div class="tryon-controls" id="tryon-controls-panel">
+        <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 10px; text-align: center;">
+          👆 <b>اسحب الهودي باللمس أو الماوس</b> لوضعه على أكتافك بدقة
+        </div>
+        <div class="tryon-control-row">
+          <label>🔍 الحجم:</label>
+          <input type="range" class="ai-range-input" id="tryon-scale-slider" min="30" max="110" value="65" oninput="updateGarmentScale(this.value)">
+        </div>
+        <div class="tryon-control-row">
+          <label>🔄 الدوران:</label>
+          <input type="range" class="ai-range-input" id="tryon-rotate-slider" min="-30" max="30" value="0" oninput="updateGarmentRotation(this.value)">
+        </div>
+        <div class="tryon-control-row">
+          <label>👁️ الشفافية:</label>
+          <input type="range" class="ai-range-input" id="tryon-opacity-slider" min="50" max="100" value="100" oninput="updateGarmentOpacity()">
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center; padding: 8px; font-size: 0.82rem;" onclick="resetGarmentPosition()">
+            <i class="fas fa-undo"></i> إعادة ضبط
+          </button>
+          <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center; padding: 8px; font-size: 0.82rem;" onclick="document.getElementById('user-photo-upload').click()">
+            <i class="fas fa-sync-alt"></i> تغيير الصورة
+          </button>
+        </div>
+      </div>
+
+      <!-- أزرار الإجراءات -->
+      <div class="tryon-actions-bar">
+        <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center;" onclick="downloadTryOnImage()">
+          <i class="fas fa-download"></i> حفظ الصورة
+        </button>
+        <button type="button" class="btn btn-primary" style="flex: 2; justify-content: center; font-weight: 800;" onclick="closeTryOnModal(); document.getElementById('add-to-cart-btn').click();">
+          <i class="fas fa-shopping-cart"></i> عجبني! أضف للسلة
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
+<script src="js/ai-fit.js"></script>
 </body>
 </html>
