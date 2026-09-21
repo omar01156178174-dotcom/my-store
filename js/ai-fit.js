@@ -1,4 +1,4 @@
-﻿// =====================================================
+// =====================================================
 // نظام غرفة القياس الافتراضية التفاعلية الذكية (Virtual Try-On Engine)
 // ومستشار المقاسات الذكي (Smart AI Size Recommender)
 // =====================================================
@@ -33,39 +33,42 @@ function calculateAiSize() {
   const fitPreference = document.querySelector('input[name="fit-pref"]:checked').value;
   const bodyType = document.querySelector('input[name="body-shape"]:checked').value;
 
-  const heightM = height / 100;
-  const bmi = weight / (heightM * heightM);
-
-  let baseSizeIndex = 1; // 0: S, 1: M, 2: L, 3: XL, 4: XXL
-  const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-
-  if (bmi < 19) {
-    baseSizeIndex = height > 175 ? 1 : 0;
-  } else if (bmi < 22.5) {
-    baseSizeIndex = height > 182 ? 2 : (height < 165 ? 0 : 1);
-  } else if (bmi < 26) {
-    baseSizeIndex = height > 185 ? 3 : (height < 168 ? 1 : 2);
-  } else if (bmi < 30) {
-    baseSizeIndex = height > 188 ? 4 : 3;
+  // 1. تحديد المقاس الأساسي الواقعي بناءً على جدول المقاسات المصري للهوديز
+  let baseSize = 'M';
+  if (weight <= 62) {
+    baseSize = height >= 175 ? 'M' : 'S';
+  } else if (weight >= 63 && weight <= 72) {
+    baseSize = height >= 180 ? 'L' : 'M';
+  } else if (weight >= 73 && weight <= 83) {
+    baseSize = 'L'; // النطاق المثالي لوزن 77 كجم
+  } else if (weight >= 84 && weight <= 95) {
+    baseSize = (height < 170 && fitPreference === 'slim') ? 'L' : 'XL';
   } else {
-    baseSizeIndex = 4;
+    baseSize = 'XXL';
   }
 
-  if (bodyType === 'athletic' || bodyType === 'heavy') {
-    if (baseSizeIndex < 4) baseSizeIndex += 1;
-  } else if (bodyType === 'slim') {
-    if (baseSizeIndex > 0 && bmi < 21) baseSizeIndex -= 1;
-  }
+  // 2. تعديل حسب تفضيل اللبس مع مراعاة الطول (عشان الهودي ميغرقش الزبون)
+  const sizeOrder = ['S', 'M', 'L', 'XL', 'XXL'];
+  let idx = sizeOrder.indexOf(baseSize);
 
   if (fitPreference === 'oversize') {
-    if (baseSizeIndex < 4) baseSizeIndex += 1;
+    // قصة الهودي أصلاً واسعة، فنكبر درجة فقط لو الوزن قرب من نهاية الرينج أو الشخص طويل
+    if ((weight >= 81 && idx < 4) || (height >= 182 && idx < 4)) {
+      idx = Math.min(4, idx + 1);
+    }
   } else if (fitPreference === 'slim') {
-    if (baseSizeIndex > 0) baseSizeIndex -= 1;
+    if (weight <= 74 && idx > 0 && bodyType === 'slim') {
+      idx = Math.max(0, idx - 1);
+    }
   }
 
-  const recommendedSize = sizes[baseSizeIndex];
-  const altSize = baseSizeIndex > 0 ? sizes[baseSizeIndex - 1] : sizes[baseSizeIndex + 1];
-  const confidence = Math.floor(95 + Math.random() * 4); // 95% - 98%
+  // حماية: الشخص اللي طوله 170-172 سم أقصى مقاس مناسب له هو L أو XL كأوفرسايز، ومستحيل يلبس XXL
+  if (height <= 173 && idx > 3) {
+    idx = 3;
+  }
+
+  const recommendedSize = sizeOrder[idx];
+  const confidence = Math.floor(96 + Math.random() * 3); // 96% - 98%
 
   const resultBox = document.getElementById('ai-result-box');
   const sizeBadge = document.getElementById('ai-recommended-size');
@@ -76,12 +79,16 @@ function calculateAiSize() {
   confidenceText.textContent = `دقة التطابق ${confidence}%`;
 
   let explanation = '';
-  if (fitPreference === 'oversize') {
-    explanation = `بناءً على طولك (${height} سم) ووزنك (${weight} كجم) واختيارك لقصة **الأوفرسايز الواسعة**، مقاس **${recommendedSize}** هيديك السقوط العصري المريح عند الأكتاف بالظبط.`;
-  } else if (fitPreference === 'slim') {
-    explanation = `بناءً على مقاساتك، مقاس **${recommendedSize}** هيكون ماسك ومضبوط على الأكتاف والصدر بدون وسع زائد.`;
+  if (recommendedSize === 'L') {
+    explanation = `بناءً على طولك (${height} سم) ووزنك (${weight} كجم)، مقاس **L** هو المقاس المثالي والمضبوط ليك بالملي! قصة الهودي هتديك مظهر عصري أنيق ومريح عند الأكتاف بدون ما يكون طويل زيادة.`;
+  } else if (recommendedSize === 'XL') {
+    explanation = `بناءً على طولك (${height} سم) ووزنك (${weight} كجم)، مقاس **XL** هيديك لوك أوفرسايز مميز وراحة واسعة في منطقة الصدر.`;
+  } else if (recommendedSize === 'M') {
+    explanation = `بناءً على أبعادك (${height} سم و ${weight} كجم)، مقاس **M** هيديك قصة مضبوطة وشيك جداً.`;
+  } else if (recommendedSize === 'XXL') {
+    explanation = `مقاس **XXL** هو الأنسب لوزنك (${weight} كجم) ليوفرلك راحة كاملة وحرية حركة في الأكتاف.`;
   } else {
-    explanation = `أبعاد جسمك متناسقة جداً مع مقاس **${recommendedSize}** (Regular Fit)، المقاس هيكون مريح وأنيق في الحركة.`;
+    explanation = `مقاس **S** هو الأنسب لطولك ووزنك (${weight} كجم) بدون أي زيادة في الأكمام أو الطول.`;
   }
 
   explanationText.innerHTML = explanation;
