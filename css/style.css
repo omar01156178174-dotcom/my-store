@@ -278,3 +278,327 @@ footer{background:var(--dark);color:rgba(255,255,255,0.8);padding:60px 0 30px}
 @media(max-width:1100px){.hero-text h1{font-size:2.8rem}.products-grid{grid-template-columns:repeat(3,1fr)}.categories-grid{grid-template-columns:repeat(2,1fr)}.features-grid{grid-template-columns:repeat(2,1fr)}.footer-grid{grid-template-columns:1fr 1fr}.shop-layout{grid-template-columns:240px 1fr}}
 @media(max-width:900px){.hero-content{grid-template-columns:1fr;text-align:center}.hero-image{display:none}.hero-buttons{justify-content:center}.hero-stats{justify-content:center}.products-grid{grid-template-columns:repeat(2,1fr)}#products-container{grid-template-columns:repeat(2,1fr)}.cart-layout{grid-template-columns:1fr}.checkout-layout{grid-template-columns:1fr}.product-detail{grid-template-columns:1fr}.promo-content{flex-direction:column;text-align:center}.promo-image{display:none}.shop-layout{grid-template-columns:1fr}.shop-filters{position:static}}
 @media(max-width:600px){.navbar-nav{display:none}.menu-toggle{display:flex}.hero-text h1{font-size:2.2rem}.products-grid{grid-template-columns:repeat(2,1fr);gap:15px}#products-container{grid-template-columns:repeat(2,1fr)}.categories-grid{grid-template-columns:repeat(2,1fr)}.features-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr;gap:30px}.form-grid{grid-template-columns:1fr}.cart-layout{grid-template-columns:1fr}.checkout-layout{grid-template-columns:1fr}}
+
+/* =====================================================
+   تصميم ميزات الذكاء الاصطناعي (AI Fitting & Try-On)
+   ===================================================== */
+
+/* زر تجربة الهودي بالذكاء الاصطناعي تحت المعرض */
+.btn-virtual-tryon-trigger {
+  width: 100%;
+  margin-top: 15px;
+  background: linear-gradient(135deg, #16182e 0%, #231e3d 100%);
+  color: #ffffff;
+  border: 1.5px solid var(--accent);
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(200, 169, 110, 0.2);
+}
+.btn-virtual-tryon-trigger:hover {
+  background: linear-gradient(135deg, #231e3d 0%, #16182e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(200, 169, 110, 0.4);
+}
+.btn-virtual-tryon-trigger i {
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+
+/* زر مستشار المقاس الذكي */
+.size-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.btn-ai-fit-trigger {
+  background: rgba(200, 169, 110, 0.12);
+  color: var(--accent-dark);
+  border: 1px solid var(--accent);
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-ai-fit-trigger:hover {
+  background: var(--accent);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* نوافذ الذكاء الاصطناعي (Modals) */
+.ai-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 24, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  padding: 20px;
+}
+.ai-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.ai-modal-container {
+  background: #ffffff;
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: modalScaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes modalScaleUp {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.ai-modal-header {
+  background: linear-gradient(135deg, var(--primary) 0%, #202447 100%);
+  color: #fff;
+  padding: 22px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--accent);
+}
+.ai-modal-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ai-modal-header-title i {
+  font-size: 1.6rem;
+  color: var(--accent);
+}
+.ai-modal-header-title h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+}
+.ai-modal-header-title span {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+.ai-modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: var(--transition);
+}
+.ai-modal-close:hover {
+  background: var(--danger);
+  transform: rotate(90deg);
+}
+
+.ai-modal-body {
+  padding: 25px;
+}
+
+/* بطاقات الخيارات (Radio Tiles) */
+.ai-tile-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.ai-tile-label {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.ai-tile-label input { display: none; }
+.ai-tile-label:hover {
+  border-color: var(--accent);
+  background: rgba(200, 169, 110, 0.05);
+}
+.ai-tile-label:has(input:checked) {
+  border-color: var(--accent);
+  background: rgba(200, 169, 110, 0.12);
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(200, 169, 110, 0.2);
+}
+.ai-tile-label i {
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+.ai-tile-label span {
+  font-size: 0.85rem;
+}
+
+/* شريط السلايدر في المودال */
+.ai-slider-wrapper {
+  margin-bottom: 22px;
+}
+.ai-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.ai-slider-val {
+  background: var(--primary);
+  color: var(--accent);
+  padding: 3px 12px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+.ai-range-input {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+  height: 6px;
+}
+
+/* كارت نتيجة الذكاء الاصطناعي */
+.ai-result-box {
+  background: linear-gradient(135deg, #1a1a2e 0%, #202447 100%);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 22px;
+  margin-top: 20px;
+  border-right: 4px solid var(--accent);
+  animation: fadeIn 0.4s ease;
+  display: none;
+}
+.ai-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.ai-recommended-badge {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--accent);
+  background: rgba(200, 169, 110, 0.15);
+  width: 65px;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+}
+.ai-confidence-pill {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid #28a745;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.ai-explanation {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 18px;
+}
+
+/* شاشة غرفة القياس الافتراضية (Canvas & Viewport) */
+.tryon-viewport-container {
+  background: #f8fafc;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 2px dashed #cbd5e1;
+  position: relative;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.tryon-upload-prompt {
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.tryon-upload-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(200, 169, 110, 0.15);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+#tryon-canvas {
+  width: 100%;
+  display: none;
+  touch-action: none;
+  cursor: grab;
+}
+#tryon-canvas:active {
+  cursor: grabbing;
+}
+.tryon-controls {
+  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  padding: 15px 18px;
+  margin-bottom: 18px;
+  display: none;
+}
+.tryon-control-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.tryon-control-row:last-child {
+  margin-bottom: 0;
+}
+.tryon-control-row label {
+  width: 80px;
+  color: var(--text);
+}
+.tryon-actions-bar {
+  display: flex;
+  gap: 10px;
+}
