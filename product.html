@@ -235,24 +235,54 @@
       <div class="tryon-viewport-container">
         <!-- منطقة الرفع المبدئية -->
         <div class="tryon-upload-prompt" id="tryon-placeholder" onclick="document.getElementById('user-photo-upload').click()">
-          <div class="tryon-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-          <h4 style="color: var(--primary); margin: 0; font-size: 1.05rem;">ارفع صورتك للمعاينة الفورية</h4>
-          <p style="color: var(--text-light); font-size: 0.82rem; margin: 0;">يفضل صورة واضحة لنصف الجسم أو كاملة لمطابقة دقيقة</p>
-          <button type="button" class="btn btn-dark" style="margin-top: 5px;"><i class="fas fa-upload"></i> اختر صورة من جهازك</button>
+          <div class="tryon-upload-icon"><i class="fas fa-camera"></i></div>
+          <h4 style="color: var(--primary); margin: 0; font-size: 1.15rem; font-weight: 800;">ارفع صورتك لمشاهدة الهودي عليك فوراً</h4>
+          <p style="color: var(--text-light); font-size: 0.85rem; margin: 0; max-width: 320px;">التقط سيلفي أو اختر صورة كاملة واضحة ليقوم الذكاء الاصطناعي بتركيب الهودي على مقاس أكتافك وصدرك</p>
+          <button type="button" class="btn btn-primary" style="margin-top: 10px; font-weight: 800;"><i class="fas fa-upload"></i> اختر صورتك الآن</button>
         </div>
         <input type="file" id="user-photo-upload" accept="image/*" style="display: none;" onchange="handleUserPhotoUpload(event)">
+        
+        <!-- أنيميشن الفحص والتحليل الذكي -->
+        <div id="tryon-scan-overlay" style="display: none; padding: 50px 20px; flex-direction: column; align-items: center; justify-content: center; gap: 15px; min-height: 350px;">
+          <div class="spinner" style="border-top-color: var(--accent); width: 60px; height: 60px;"></div>
+          <h4 style="color: var(--primary); margin: 0; font-size: 1.1rem; font-weight: 800;">🔍 جاري معالجة وتلبيس الهودي بالذكاء الاصطناعي...</h4>
+          <p style="color: var(--text-light); font-size: 0.85rem; margin: 0;">يتم الآن مطابقة أبعاد الأكتاف وقصة الهودي على صورتك</p>
+        </div>
+
         <!-- كانفاس المعاينة -->
         <canvas id="tryon-canvas"></canvas>
       </div>
 
+      <!-- تبديل لون الهودي مباشرة على الجسم -->
+      <div id="tryon-colors-bar" style="margin-bottom: 15px;">
+        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary); display: block; margin-bottom: 6px;">🎨 اختر لون الهودي عليك:</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="hoodie-color-chip active" data-color="black" onclick="changeHoodieColor('black')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
+            <span style="width: 14px; height: 14px; border-radius: 50%; background: #18181b; display: inline-block;"></span> أسود
+          </button>
+          <button type="button" class="hoodie-color-chip" data-color="grey" onclick="changeHoodieColor('grey')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
+            <span style="width: 14px; height: 14px; border-radius: 50%; background: #64748b; display: inline-block;"></span> رمادي
+          </button>
+          <button type="button" class="hoodie-color-chip" data-color="navy" onclick="changeHoodieColor('navy')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
+            <span style="width: 14px; height: 14px; border-radius: 50%; background: #1e293b; display: inline-block;"></span> كحلي
+          </button>
+          <button type="button" class="hoodie-color-chip" data-color="beige" onclick="changeHoodieColor('beige')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
+            <span style="width: 14px; height: 14px; border-radius: 50%; background: #c2a688; display: inline-block;"></span> بيج
+          </button>
+          <button type="button" class="hoodie-color-chip" data-color="red" onclick="changeHoodieColor('red')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
+            <span style="width: 14px; height: 14px; border-radius: 50%; background: #881337; display: inline-block;"></span> نبيتي
+          </button>
+        </div>
+      </div>
+
       <!-- شريط التحكم التفاعلي بالهودي -->
       <div class="tryon-controls" id="tryon-controls-panel">
-        <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 10px; text-align: center;">
-          👆 <b>اسحب الهودي باللمس أو الماوس</b> لوضعه على أكتافك بدقة
+        <div style="font-size: 0.8rem; color: var(--primary); margin-bottom: 10px; text-align: center; background: rgba(200, 169, 110, 0.15); padding: 6px 10px; border-radius: 6px; font-weight: 700;">
+          💡 <b>حرك الهودي باللمس أو الماوس</b> ليطابق مكان أكتافك وصدرك بدقة
         </div>
         <div class="tryon-control-row">
           <label>🔍 الحجم:</label>
-          <input type="range" class="ai-range-input" id="tryon-scale-slider" min="30" max="110" value="65" oninput="updateGarmentScale(this.value)">
+          <input type="range" class="ai-range-input" id="tryon-scale-slider" min="40" max="140" value="82" oninput="updateGarmentScale(this.value)">
         </div>
         <div class="tryon-control-row">
           <label>🔄 الدوران:</label>
@@ -264,7 +294,7 @@
         </div>
         <div style="display: flex; gap: 8px; margin-top: 12px;">
           <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center; padding: 8px; font-size: 0.82rem;" onclick="resetGarmentPosition()">
-            <i class="fas fa-undo"></i> إعادة ضبط
+            <i class="fas fa-undo"></i> ضبط تلقائي
           </button>
           <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center; padding: 8px; font-size: 0.82rem;" onclick="document.getElementById('user-photo-upload').click()">
             <i class="fas fa-sync-alt"></i> تغيير الصورة
