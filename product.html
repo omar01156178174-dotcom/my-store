@@ -65,8 +65,8 @@
       <div class="product-gallery">
         <img id="main-product-img" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80" alt="المنتج" class="main-img">
         <div class="product-thumbnails" id="product-thumbs"></div>
-        <button type="button" class="btn-virtual-tryon-trigger" onclick="openTryOnModal()">
-          <i class="fas fa-camera-retro"></i> 🪞 جرب الهودي عليك بالذكاء الاصطناعي (Try-On)
+        <button type="button" class="btn-virtual-tryon-trigger" onclick="openGeminiFittingRoom()">
+          <i class="fas fa-sparkles"></i> 🪞 غرفة قياسات Google Gemini AI
         </button>
       </div>
       <div class="product-detail-info">
@@ -218,109 +218,102 @@
   </div>
 </div>
 
-<!-- نافذة غرفة القياس الافتراضية (Virtual Try-On) -->
-<div class="ai-modal-overlay" id="virtual-tryon-modal">
-  <div class="ai-modal-container" style="max-width: 500px;">
+<!-- نافذة غرفة قياسات Google Gemini AI -->
+<div class="ai-modal-overlay" id="gemini-fitting-modal">
+  <div class="ai-modal-container" style="max-width: 580px;">
     <div class="ai-modal-header">
       <div class="ai-modal-header-title">
-        <i class="fas fa-camera"></i>
+        <i class="fas fa-sparkles" style="color: var(--accent);"></i>
         <div>
-          <h3>غرفة القياس الافتراضية</h3>
-          <span>شوف شكلك بالهودي قبل ما تشتريه</span>
+          <h3>غرفة قياسات Google Gemini AI</h3>
+          <span>فحص مظهرك ومطابقة الهودي مع جسمك بالذكاء الاصطناعي</span>
         </div>
       </div>
-      <button class="ai-modal-close" onclick="closeTryOnModal()"><i class="fas fa-times"></i></button>
+      <button class="ai-modal-close" onclick="closeGeminiFittingRoom()"><i class="fas fa-times"></i></button>
     </div>
     <div class="ai-modal-body">
-      <div class="tryon-viewport-container">
-        <!-- منطقة الرفع المبدئية -->
-        <div class="tryon-upload-prompt" id="tryon-placeholder" onclick="document.getElementById('user-photo-upload').click()">
-          <div class="tryon-upload-icon"><i class="fas fa-camera"></i></div>
-          <h4 style="color: var(--primary); margin: 0; font-size: 1.15rem; font-weight: 800;">ارفع صورتك لمشاهدة الهودي عليك فوراً</h4>
-          <p style="color: var(--text-light); font-size: 0.85rem; margin: 0; max-width: 320px;">التقط سيلفي أو اختر صورة كاملة واضحة ليقوم الذكاء الاصطناعي بتركيب الهودي على مقاس أكتافك وصدرك</p>
-          <button type="button" class="btn btn-primary" style="margin-top: 10px; font-weight: 800;"><i class="fas fa-upload"></i> اختر صورتك الآن</button>
+      <!-- 1. شاشة رفع الصورة -->
+      <div id="gemini-upload-area" style="text-align: center; padding: 30px 20px; border: 2px dashed #cbd5e1; border-radius: var(--radius); background: #f8fafc; cursor: pointer;" onclick="document.getElementById('gemini-file-input').click()">
+        <div style="width: 75px; height: 75px; background: rgba(200, 169, 110, 0.15); border-radius: 50%; color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 15px;">
+          <i class="fas fa-camera"></i>
         </div>
-        <input type="file" id="user-photo-upload" accept="image/*" style="display: none;" onchange="handleUserPhotoUpload(event)">
-        
-        <!-- أنيميشن الفحص والتحليل الذكي -->
-        <div id="tryon-scan-overlay" style="display: none; padding: 50px 20px; flex-direction: column; align-items: center; justify-content: center; gap: 15px; min-height: 350px;">
-          <div class="spinner" style="border-top-color: var(--accent); width: 60px; height: 60px;"></div>
-          <h4 style="color: var(--primary); margin: 0; font-size: 1.1rem; font-weight: 800;">🔍 جاري معالجة وتلبيس الهودي بالذكاء الاصطناعي...</h4>
-          <p style="color: var(--text-light); font-size: 0.85rem; margin: 0;">يتم الآن مطابقة أبعاد الأكتاف وقصة الهودي على صورتك</p>
-        </div>
-
-        <!-- كانفاس المعاينة -->
-        <canvas id="tryon-canvas"></canvas>
-      </div>
-
-      <!-- تبديل لون الهودي مباشرة على الجسم -->
-      <div id="tryon-colors-bar" style="margin-bottom: 15px;">
-        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary); display: block; margin-bottom: 6px;">🎨 اختر لون الهودي عليك:</label>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="hoodie-color-chip active" data-color="black" onclick="changeHoodieColor('black')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
-            <span style="width: 14px; height: 14px; border-radius: 50%; background: #18181b; display: inline-block;"></span> أسود
-          </button>
-          <button type="button" class="hoodie-color-chip" data-color="grey" onclick="changeHoodieColor('grey')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
-            <span style="width: 14px; height: 14px; border-radius: 50%; background: #64748b; display: inline-block;"></span> رمادي
-          </button>
-          <button type="button" class="hoodie-color-chip" data-color="navy" onclick="changeHoodieColor('navy')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
-            <span style="width: 14px; height: 14px; border-radius: 50%; background: #1e293b; display: inline-block;"></span> كحلي
-          </button>
-          <button type="button" class="hoodie-color-chip" data-color="beige" onclick="changeHoodieColor('beige')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
-            <span style="width: 14px; height: 14px; border-radius: 50%; background: #c2a688; display: inline-block;"></span> بيج
-          </button>
-          <button type="button" class="hoodie-color-chip" data-color="red" onclick="changeHoodieColor('red')" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 50px; background: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 600;">
-            <span style="width: 14px; height: 14px; border-radius: 50%; background: #881337; display: inline-block;"></span> نبيتي
-          </button>
-        </div>
-      </div>
-
-      <!-- شريط التحكم التفاعلي بالهودي -->
-      <div class="tryon-controls" id="tryon-controls-panel">
-        <div style="font-size: 0.8rem; color: var(--primary); margin-bottom: 10px; text-align: center; background: rgba(200, 169, 110, 0.15); padding: 6px 10px; border-radius: 6px; font-weight: 700;">
-          💡 <b>حرك الهودي باللمس أو الماوس</b> ليطابق مكان أكتافك وصدرك بدقة
-        </div>
-        <div class="tryon-control-row">
-          <label>🔍 الحجم:</label>
-          <input type="range" class="ai-range-input" id="tryon-scale-slider" min="40" max="140" value="82" oninput="updateGarmentScale(this.value)">
-        </div>
-        <div class="tryon-control-row">
-          <label>🔄 الدوران:</label>
-          <input type="range" class="ai-range-input" id="tryon-rotate-slider" min="-30" max="30" value="0" oninput="updateGarmentRotation(this.value)">
-        </div>
-        <div class="tryon-control-row">
-          <label>👁️ الشفافية:</label>
-          <input type="range" class="ai-range-input" id="tryon-opacity-slider" min="50" max="100" value="100" oninput="updateGarmentOpacity()">
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 12px;">
-          <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center; padding: 8px; font-size: 0.82rem;" onclick="resetGarmentPosition()">
-            <i class="fas fa-undo"></i> ضبط تلقائي
-          </button>
-          <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center; padding: 8px; font-size: 0.82rem;" onclick="document.getElementById('user-photo-upload').click()">
-            <i class="fas fa-sync-alt"></i> تغيير الصورة
-          </button>
-        </div>
-      </div>
-
-      <!-- صندوق تقييم مظهر العميل من Google Gemini AI -->
-      <div id="gemini-photo-analysis" style="display: none; margin-bottom: 15px;"></div>
-
-      <!-- أزرار الإجراءات -->
-      <div class="tryon-actions-bar">
-        <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center;" onclick="downloadTryOnImage()">
-          <i class="fas fa-download"></i> حفظ الصورة
+        <h4 style="color: var(--primary); font-size: 1.2rem; font-weight: 800; margin-bottom: 8px;">ارفع صورتك لتدخل غرفة القياس الذكية</h4>
+        <p style="color: var(--text-light); font-size: 0.88rem; max-width: 380px; margin: 0 auto 15px; line-height: 1.6;">
+          التقط سيلفي أو اختر صورة كاملة واضحة ليقوم ذكاء جوجل (Gemini Vision) بفحص أكتافك وبنيتك واختيار المقاس واللون الأنسب لك.
+        </p>
+        <button type="button" class="btn btn-primary" style="font-weight: 800; padding: 12px 25px;">
+          <i class="fas fa-cloud-upload-alt"></i> اختر صورتك الآن
         </button>
-        <button type="button" class="btn btn-primary" style="flex: 2; justify-content: center; font-weight: 800;" onclick="closeTryOnModal(); document.getElementById('add-to-cart-btn').click();">
-          <i class="fas fa-shopping-cart"></i> عجبني! أضف للسلة
-        </button>
+        <input type="file" id="gemini-file-input" accept="image/*" style="display: none;" onchange="handleGeminiFittingUpload(event)">
+      </div>
+
+      <!-- 2. شاشة أنيميشن فحص الذكاء الاصطناعي -->
+      <div id="gemini-scanning-area" style="display: none; padding: 50px 20px; flex-direction: column; align-items: center; justify-content: center; gap: 15px; min-height: 350px; text-align: center;">
+        <div class="spinner" style="border-top-color: var(--accent); width: 65px; height: 65px; border-width: 5px;"></div>
+        <h4 style="color: var(--primary); margin: 0; font-size: 1.15rem; font-weight: 800;">
+          <i class="fas fa-brain" style="color: var(--accent);"></i> Google Gemini Vision يفحص صورتك...
+        </h4>
+        <p style="color: var(--text-light); font-size: 0.9rem; max-width: 320px; margin: 0; line-height: 1.6;">
+          يتم الآن قياس أبعاد الأكتاف، وتحديد المقاس المناسب، وتنسيق أفضل لون هودي يتماشى مع مظهرك.
+        </p>
+      </div>
+
+      <!-- 3. شاشة نتائج استوديو القياس (Studio Match) -->
+      <div id="gemini-result-area" style="display: none;">
+        <!-- المقارنة التفاعلية: صورتك + الهودي -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f1f5f9; padding: 15px; border-radius: var(--radius-sm);">
+          <div style="text-align: center;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--primary); margin-bottom: 6px;">
+              <i class="fas fa-user"></i> صورتك الشخصية
+            </div>
+            <img id="gemini-user-photo-preview" src="" alt="صورتك" style="width: 100%; height: 210px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--accent-dark); margin-bottom: 6px;">
+              <i class="fas fa-tshirt"></i> الهودي المناسب لك
+            </div>
+            <img id="gemini-hoodie-preview" src="" alt="الهودي" style="width: 100%; height: 210px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+          </div>
+        </div>
+
+        <!-- نتيجة المقاس المعتمد -->
+        <div style="background: linear-gradient(135deg, #16182e 0%, #202447 100%); color: #fff; border-radius: var(--radius-sm); padding: 18px 20px; margin-bottom: 18px; border-right: 4px solid var(--accent); display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <span style="font-size: 0.8rem; color: rgba(255,255,255,0.7); display: block; margin-bottom: 2px;">المقاس الأنسب لك بالذكاء الاصطناعي:</span>
+            <strong style="color: var(--accent); font-size: 1rem;"><i class="fas fa-sparkles"></i> بنسبة توافق 98%</strong>
+          </div>
+          <div id="gemini-detected-size-badge" style="background: rgba(200, 169, 110, 0.2); border: 1.5px solid var(--accent); color: var(--accent); font-size: 2.2rem; font-weight: 900; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            L
+          </div>
+        </div>
+
+        <!-- تقرير خبير الأزياء من Google Gemini -->
+        <div style="background: #ffffff; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 18px; margin-bottom: 20px;">
+          <div style="font-size: 0.92rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-comment-dots" style="color: var(--accent);"></i> استشارة خبير المظهر من Google Gemini:
+          </div>
+          <div id="gemini-report-content" style="font-size: 0.9rem; color: var(--text); line-height: 1.8;">
+            <!-- يتم تعبئته بواسطة Gemini -->
+          </div>
+        </div>
+
+        <!-- أزرار الإجراءات -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-outline" style="flex: 1; justify-content: center;" onclick="resetGeminiFitting()">
+            <i class="fas fa-redo"></i> تجربة صورة أخرى
+          </button>
+          <button type="button" class="btn btn-primary" style="flex: 2; justify-content: center; font-weight: 800; font-size: 1rem;" onclick="applyAiSizeToProduct(); document.getElementById('add-to-cart-btn').click();">
+            <i class="fas fa-shopping-cart"></i> اعتماد المقاس وإضافة للسلة
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<script src="js/products.js?v=12"></script>
-<script src="js/cart.js?v=12"></script>
-<script src="js/main.js?v=12"></script>
-<script src="js/ai-fit.js?v=12"></script>
+<script src="js/products.js?v=15"></script>
+<script src="js/cart.js?v=15"></script>
+<script src="js/main.js?v=15"></script>
+<script src="js/ai-fit.js?v=15"></script>
 </body>
 </html>
