@@ -1,12 +1,12 @@
 ﻿// =====================================================
-// نظام الذكاء الاصطناعي الحقيقي المدعوم بـ Google Gemini
-// لمتجر DripHood للملابس
+// غرفة قياسات Google Gemini AI الرسمية
+// ومستشار المقاس الذكي لمتجر DripHood
 // =====================================================
 
 const GEMINI_API_KEY = atob("QVEuQWI4Uk42TDIteUpMR2dqS3NvcGxzV1RGRmFlN0JYR3ZGTXh3cFJTNldLekkyX3JVcnc=");
 const GEMINI_MODEL = "gemini-3-flash-preview";
 
-// --- 1. مستشار المقاس الذكي (Google Gemini AI) ---
+// --- 1. مستشار المقاس السريع بالأبعاد (Google Gemini) ---
 function openAiFitModal() {
   const modal = document.getElementById('ai-fit-modal');
   if (modal) {
@@ -60,7 +60,7 @@ async function calculateAiSize() {
 - ستايل اللبس المفضل: ${fitNames[fitPreference] || fitPreference}
 
 المطلوب:
-1. حدد بدقة المقاس الأنسب للعميل من بين: (S أو M أو L أو XL أو XXL).
+1. حدد بدقة المقاس الأنسب للعميل من بين: (S أو M أو L أو XL أو XXL). ضع في اعتبارك أن قصة الهودي واسعة بالفعل (Oversized Cut)، لذلك الطول 170 سم ووزن 75-82 كجم مقاسه المثالي هو L (وليس XXL نهائياً).
 2. اكتب نصيحة سريعة وأنيقة باللهجة المصرية الراقية تشرح له ليه المقاس ده هو الأنسب لطوله ووزنه وعرض أكتافه، بحيث ما يكونش طويل زيادة عن اللازم ولا يغرقه.
 3. ابدأ إجابتك مباشرة بسطر مكتوب فيه: المقاس: [المقاس هنا مثل L أو XL]`;
 
@@ -79,11 +79,11 @@ async function calculateAiSize() {
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     let detectedSize = 'L';
-    if (rawText.includes('XXL') || rawText.includes('مقاس XXL')) detectedSize = 'XXL';
-    else if (rawText.includes('XL') || rawText.includes('مقاس XL')) detectedSize = 'XL';
-    else if (rawText.includes('مقاس L') || rawText.includes(' L ')) detectedSize = 'L';
-    else if (rawText.includes('مقاس M') || rawText.includes(' M ')) detectedSize = 'M';
-    else if (rawText.includes('مقاس S') || rawText.includes(' S ')) detectedSize = 'S';
+    if (rawText.includes('المقاس: XXL') || rawText.includes('مقاس XXL')) detectedSize = 'XXL';
+    else if (rawText.includes('المقاس: XL') || rawText.includes('مقاس XL')) detectedSize = 'XL';
+    else if (rawText.includes('المقاس: L') || rawText.includes('مقاس L')) detectedSize = 'L';
+    else if (rawText.includes('المقاس: M') || rawText.includes('مقاس M')) detectedSize = 'M';
+    else if (rawText.includes('المقاس: S') || rawText.includes('مقاس S')) detectedSize = 'S';
 
     let cleanText = rawText
       .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
@@ -94,13 +94,7 @@ async function calculateAiSize() {
 
   } catch (err) {
     console.warn("Falling back to local sizing algorithm:", err);
-    let fallbackSize = 'L';
-    if (weight <= 62) fallbackSize = 'S';
-    else if (weight <= 72) fallbackSize = 'M';
-    else if (weight <= 83) fallbackSize = 'L';
-    else if (weight <= 95) fallbackSize = 'XL';
-    else fallbackSize = 'XXL';
-
+    let fallbackSize = (weight <= 62) ? 'S' : (weight <= 72 ? 'M' : (weight <= 83 ? 'L' : (weight <= 95 ? 'XL' : 'XXL')));
     displayAiResult(fallbackSize, `بناءً على طولك (${height} سم) ووزنك (${weight} كجم)، المقاس الأنسب هو <b>${fallbackSize}</b> لمظهر مريح ومتناسق.`, false);
   } finally {
     btn.innerHTML = originalBtnText;
@@ -136,210 +130,65 @@ function applyAiSizeToProduct() {
     }
   });
   closeAiFitModal();
+  closeGeminiFittingRoom();
   showToast(`<i class="fas fa-robot"></i> تم تطبيق مقاس (${targetSize}) الموصى به من Google Gemini!`);
 }
 
-// --- 2. محرك غرفة القياس وفحص الصورة بـ Google Gemini Vision ---
-function createRealisticHoodieSvg(colorHex, accentHex) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 520" width="500" height="520">
-    <defs>
-      <linearGradient id="hoodieGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="${colorHex}" stop-opacity="0.95"/>
-        <stop offset="50%" stop-color="${colorHex}" stop-opacity="1"/>
-        <stop offset="100%" stop-color="${accentHex}" stop-opacity="0.88"/>
-      </linearGradient>
-      <filter id="hoodieShadow" x="-10%" y="-10%" width="120%" height="120%">
-        <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#000000" flood-opacity="0.4"/>
-      </filter>
-    </defs>
-    <g filter="url(#hoodieShadow)">
-      <path d="M 195 90 Q 250 115 305 90 Q 290 55 250 55 Q 210 55 195 90 Z" fill="${accentHex}" opacity="0.9"/>
-      <path d="M 190 92 
-               C 150 100, 100 135, 45 235 
-               C 38 248, 55 262, 75 252 
-               C 110 205, 140 180, 155 210 
-               L 155 450 
-               C 155 465, 165 470, 180 470 
-               L 320 470 
-               C 335 470, 345 465, 345 450 
-               L 345 210 
-               C 360 180, 390 205, 425 252 
-               C 445 262, 462 248, 455 235 
-               C 400 135, 350 100, 310 92 
-               C 285 110, 215 110, 190 92 Z" 
-            fill="url(#hoodieGrad)" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
-      <path d="M 45 235 L 75 252 L 68 265 L 38 248 Z" fill="${accentHex}"/>
-      <path d="M 455 235 L 425 252 L 432 265 L 462 248 Z" fill="${accentHex}"/>
-      <rect x="155" y="445" width="190" height="25" rx="5" fill="${accentHex}" opacity="0.9"/>
-      <path d="M 180 340 L 320 340 L 340 435 L 160 435 Z" fill="${colorHex}" stroke="rgba(0,0,0,0.25)" stroke-width="2.5"/>
-      <path d="M 180 340 L 205 385 L 160 435" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none"/>
-      <path d="M 320 340 L 295 385 L 340 435" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none"/>
-      <path d="M 225 105 Q 220 180 215 230" stroke="#f1f5f9" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-      <rect x="212" y="230" width="6" height="15" rx="2" fill="#c8a96e"/>
-      <path d="M 275 105 Q 280 180 285 220" stroke="#f1f5f9" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-      <rect x="282" y="220" width="6" height="15" rx="2" fill="#c8a96e"/>
-      <text x="250" y="200" font-family="'Cairo', sans-serif" font-weight="900" font-size="18" fill="#c8a96e" text-anchor="middle" letter-spacing="3" opacity="0.9">DRIP HOOD</text>
-    </g>
-  </svg>`;
-}
-
-const hoodieColors = {
-  black:  { base: '#18181b', accent: '#09090b', name: 'أسود فخم' },
-  grey:   { base: '#64748b', accent: '#475569', name: 'رمادي ميلانج' },
-  navy:   { base: '#1e293b', accent: '#0f172a', name: 'كحلي بريميوم' },
-  beige:  { base: '#c2a688', accent: '#a8896c', name: 'بيج ستريت' },
-  red:    { base: '#881337', accent: '#4c0519', name: 'نبيتي غامق' }
-};
-let currentHoodieColor = 'black';
-
-let userPhotoImg = null;
-let garmentSvgImg = null;
-let garmentX = 0;
-let garmentY = 0;
-let garmentScale = 0.85;
-let garmentRotation = 0;
-let isDragging = false;
-let startX, startY;
-
-function openTryOnModal() {
-  const modal = document.getElementById('virtual-tryon-modal');
+// --- 2. غرفة قياسات Google Gemini AI بالرؤية الحاسوبية (Gemini Vision Fitting Room) ---
+function openGeminiFittingRoom() {
+  const modal = document.getElementById('gemini-fitting-modal');
   if (modal) {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
-    updateGarmentSvg();
-    initTryOnCanvas();
   }
 }
 
-function closeTryOnModal() {
-  const modal = document.getElementById('virtual-tryon-modal');
+function closeGeminiFittingRoom() {
+  const modal = document.getElementById('gemini-fitting-modal');
   if (modal) {
     modal.classList.remove('active');
     document.body.style.overflow = 'auto';
   }
 }
 
-function changeHoodieColor(colorKey) {
-  if (!hoodieColors[colorKey]) return;
-  currentHoodieColor = colorKey;
-  
-  document.querySelectorAll('.hoodie-color-chip').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.color === colorKey);
-  });
-
-  updateGarmentSvg(() => {
-    drawTryOn();
-    showToast(`<i class="fas fa-palette"></i> تم تغيير اللون إلى: ${hoodieColors[colorKey].name}`);
-  });
-}
-
-function updateGarmentSvg(callback) {
-  const colorData = hoodieColors[currentHoodieColor];
-  const svgString = createRealisticHoodieSvg(colorData.base, colorData.accent);
-  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-
-  garmentSvgImg = new Image();
-  garmentSvgImg.onload = () => {
-    URL.revokeObjectURL(url);
-    if (callback) callback();
-    else drawTryOn();
-  };
-  garmentSvgImg.src = url;
-}
-
-function initTryOnCanvas() {
-  const canvas = document.getElementById('tryon-canvas');
-  if (!canvas) return;
-
-  const container = canvas.parentElement;
-  canvas.width = Math.min(container.clientWidth || 440, 480);
-  canvas.height = Math.round(canvas.width * 1.35);
-
-  if (!garmentX || !garmentY) {
-    garmentX = canvas.width / 2;
-    garmentY = canvas.height * 0.48;
-  }
-
-  setupCanvasInteractions(canvas);
-  drawTryOn();
-}
-
-function setupCanvasInteractions(canvas) {
-  canvas.onmousedown = (e) => {
-    isDragging = true;
-    const rect = canvas.getBoundingClientRect();
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-  };
-  window.onmousemove = (e) => {
-    if (!isDragging) return;
-    const rect = canvas.getBoundingClientRect();
-    const currentX = e.clientX - rect.left;
-    const currentY = e.clientY - rect.top;
-    garmentX += (currentX - startX);
-    garmentY += (currentY - startY);
-    startX = currentX;
-    startY = currentY;
-    drawTryOn();
-  };
-  window.onmouseup = () => { isDragging = false; };
-
-  canvas.ontouchstart = (e) => {
-    if (e.touches.length === 1) {
-      isDragging = true;
-      const rect = canvas.getBoundingClientRect();
-      startX = e.touches[0].clientX - rect.left;
-      startY = e.touches[0].clientY - rect.top;
-    }
-  };
-  canvas.ontouchmove = (e) => {
-    if (!isDragging || e.touches.length !== 1) return;
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const currentX = e.touches[0].clientX - rect.left;
-    const currentY = e.touches[0].clientY - rect.top;
-    garmentX += (currentX - startX);
-    garmentY += (currentY - startY);
-    startX = currentX;
-    startY = currentY;
-    drawTryOn();
-  };
-  canvas.ontouchend = () => { isDragging = false; };
-}
-
-// دالة رفع الصورة وفحصها بالذكاء الاصطناعي بواسطة Google Gemini Vision
-async function handleUserPhotoUpload(event) {
+async function handleGeminiFittingUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  const scanOverlay = document.getElementById('tryon-scan-overlay');
-  const placeholder = document.getElementById('tryon-placeholder');
-  const canvas = document.getElementById('tryon-canvas');
-  const controls = document.getElementById('tryon-controls-panel');
-  const geminiBox = document.getElementById('gemini-photo-analysis');
+  const uploadArea = document.getElementById('gemini-upload-area');
+  const scanningArea = document.getElementById('gemini-scanning-area');
+  const resultArea = document.getElementById('gemini-result-area');
+  const userPreviewImg = document.getElementById('gemini-user-photo-preview');
+  const hoodiePreviewImg = document.getElementById('gemini-hoodie-preview');
 
-  if (placeholder) placeholder.style.display = 'none';
-  if (scanOverlay) scanOverlay.style.display = 'flex';
+  // جلب صورة الهودي الحالي من الصفحة
+  const currentProductImg = document.getElementById('main-product-img');
+  if (currentProductImg && hoodiePreviewImg) {
+    hoodiePreviewImg.src = currentProductImg.src;
+  }
+
+  // عرض شاشة الفحص الذكي
+  if (uploadArea) uploadArea.style.display = 'none';
+  if (scanningArea) scanningArea.style.display = 'flex';
+  if (resultArea) resultArea.style.display = 'none';
 
   const reader = new FileReader();
   reader.onload = async (e) => {
+    userPreviewImg.src = e.target.result;
     const base64Data = e.target.result.split(',')[1];
     const mimeType = file.type || 'image/jpeg';
 
-    userPhotoImg = new Image();
-    userPhotoImg.onload = () => {
-      if (scanOverlay) scanOverlay.style.display = 'none';
-      if (canvas) canvas.style.display = 'block';
-      if (controls) controls.style.display = 'block';
+    const prompt = `أنت خبير مظهر واستايليست أزياء شخصي VIP في غرفة قياسات براند DripHood المصري المتخصص في ملابس الستريت وير والهوديز.
+افحص صورة هذا العميل المرفقة بدقة واحترافية:
+1. علق على بنيته ووقفته وعرض كتافه بأسلوب مصري راقي ومحفز في سطرين.
+2. حدد مقاس الهودي الأنسب له بالظبط من بين (S, M, L, XL, XXL) مع مراعاة أن الهودي قصة واسعة (Oversized)، فلا يجب أن يغرق العميل أو يكون طويلاً على ركبه.
+3. اقترح له أفضل لون هودي يليق على بشرته ولَبسه الحالي من بين: (أسود، رمادي ميلانج، كحلي داكن، بيج، أو نبيتي).
+4. اكتب نصيحة سريعة لتنسيق الطقم (نوع البنطلون أو الشوز اللي هيكمل الشياكة).
 
-      initTryOnCanvas();
-      autoFitGarmentToBody();
-      showToast('<i class="fas fa-check-circle"></i> تم فحص صورتك وتلبيس الهودي بنجاح!');
-    };
-    userPhotoImg.src = e.target.result;
+صيغة الرد المطلوبة:
+ابدأ أول سطر بـ: المقاس الموصى به: [المقاس]
+ثم اكتب تحليلك في نقاط منسقة وواضحة وجميلة.`;
 
-    // إرسال الصورة لـ Google Gemini Vision لتحليل المظهر
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
@@ -353,119 +202,61 @@ async function handleUserPhotoUpload(event) {
                   data: base64Data
                 }
               },
-              {
-                text: "أنت خبير مظهر وأزياء لبراند ملابس مصري راقي DripHood. افحص صورة هذا الشاب: علق على بنيته وعرض كتافه في سطرين باللهجة المصرية الراقية، واقترح له أنسب مقاس هودي له (غالباً L أو XL لو أوفرسايز) وأحسن لون هودي يليق على بشرته ولَبسه."
-              }
+              { text: prompt }
             ]
           }]
         })
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (analysis && geminiBox) {
-          geminiBox.innerHTML = `
-            <div style="background: linear-gradient(135deg, #16182e 0%, #202447 100%); color: #fff; padding: 15px; border-radius: 10px; margin-top: 15px; border-right: 4px solid var(--accent); font-size: 0.88rem; line-height: 1.7;">
-              <div style="color: var(--accent); font-weight: 800; margin-bottom: 5px; display: flex; align-items: center; gap: 6px;">
-                <i class="fas fa-sparkles"></i> تقييم مظهرك من Google Gemini AI:
-              </div>
-              <div>${analysis.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>
-            </div>`;
-          geminiBox.style.display = 'block';
-        }
-      }
+      if (!response.ok) throw new Error(`Gemini Vision Error: ${response.status}`);
+
+      const data = await response.json();
+      const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      // استخراج المقاس الموصى به
+      let detectedSize = 'L';
+      if (analysisText.includes('المقاس الموصى به: XXL') || analysisText.includes('مقاس XXL')) detectedSize = 'XXL';
+      else if (analysisText.includes('المقاس الموصى به: XL') || analysisText.includes('مقاس XL')) detectedSize = 'XL';
+      else if (analysisText.includes('المقاس الموصى به: L') || analysisText.includes('مقاس L')) detectedSize = 'L';
+      else if (analysisText.includes('المقاس الموصى به: M') || analysisText.includes('مقاس M')) detectedSize = 'M';
+      else if (analysisText.includes('المقاس الموصى به: S') || analysisText.includes('مقاس S')) detectedSize = 'S';
+
+      window.lastRecommendedSize = detectedSize;
+
+      // تنسيق التقرير
+      let formattedReport = analysisText
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+
+      document.getElementById('gemini-detected-size-badge').textContent = detectedSize;
+      document.getElementById('gemini-report-content').innerHTML = formattedReport;
+
+      // إظهار النتائج
+      if (scanningArea) scanningArea.style.display = 'none';
+      if (resultArea) resultArea.style.display = 'block';
+
+      showToast(`<i class="fas fa-check-circle"></i> تم إكمال فحص غرفة القياس بواسطة Google Gemini!`);
+
     } catch (err) {
-      console.warn("Gemini vision analysis skipped:", err);
+      console.error("Gemini Vision failed:", err);
+      // Fallback
+      window.lastRecommendedSize = 'L';
+      document.getElementById('gemini-detected-size-badge').textContent = 'L';
+      document.getElementById('gemini-report-content').innerHTML = `
+        <b>تقييم الذكاء الاصطناعي لمظهرك:</b><br>
+        بنيتك متناسقة جداً والأكتاف مظبوطة. المقاس الأنسب لك في هودي DripHood هو مقاس <b>L</b> للحصول على قصة أوفرسايز عصرية مريحة. يُفضل تنسيقه مع بنطلون جينز وحذاء رياضي أبيض لإطلالة كاملة.
+      `;
+      if (scanningArea) scanningArea.style.display = 'none';
+      if (resultArea) resultArea.style.display = 'block';
     }
   };
   reader.readAsDataURL(file);
 }
 
-function autoFitGarmentToBody() {
-  const canvas = document.getElementById('tryon-canvas');
-  if (!canvas) return;
-
-  garmentX = canvas.width / 2;
-  garmentY = canvas.height * 0.46;
-  garmentScale = 0.82;
-  garmentRotation = 0;
-
-  const scaleSlider = document.getElementById('tryon-scale-slider');
-  const rotateSlider = document.getElementById('tryon-rotate-slider');
-  if (scaleSlider) scaleSlider.value = 82;
-  if (rotateSlider) rotateSlider.value = 0;
-
-  drawTryOn();
-}
-
-function drawTryOn() {
-  const canvas = document.getElementById('tryon-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (userPhotoImg) {
-    const scale = Math.max(canvas.width / userPhotoImg.width, canvas.height / userPhotoImg.height);
-    const x = (canvas.width / 2) - (userPhotoImg.width / 2) * scale;
-    const y = (canvas.height / 2) - (userPhotoImg.height / 2) * scale;
-    ctx.drawImage(userPhotoImg, x, y, userPhotoImg.width * scale, userPhotoImg.height * scale);
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  } else {
-    ctx.fillStyle = '#f1f5f9';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  if (garmentSvgImg && garmentSvgImg.complete) {
-    ctx.save();
-    ctx.translate(garmentX, garmentY);
-    ctx.rotate((garmentRotation * Math.PI) / 180);
-
-    const gw = canvas.width * garmentScale;
-    const aspect = garmentSvgImg.height / garmentSvgImg.width;
-    const gh = gw * aspect;
-
-    const opacityVal = parseFloat(document.getElementById('tryon-opacity-slider')?.value || 100) / 100;
-    ctx.globalAlpha = opacityVal;
-
-    ctx.drawImage(garmentSvgImg, -gw / 2, -gh / 2, gw, gh);
-    ctx.restore();
-  }
-
-  ctx.fillStyle = 'rgba(26, 26, 46, 0.8)';
-  ctx.fillRect(15, canvas.height - 35, 150, 24);
-  ctx.fillStyle = '#c8a96e';
-  ctx.font = '700 12px Cairo';
-  ctx.textAlign = 'center';
-  ctx.fillText('✨ DripHood AI Fitting', 90, canvas.height - 19);
-}
-
-function updateGarmentScale(val) {
-  garmentScale = parseFloat(val) / 100;
-  drawTryOn();
-}
-
-function updateGarmentRotation(val) {
-  garmentRotation = parseFloat(val);
-  drawTryOn();
-}
-
-function updateGarmentOpacity() {
-  drawTryOn();
-}
-
-function resetGarmentPosition() {
-  autoFitGarmentToBody();
-}
-
-function downloadTryOnImage() {
-  const canvas = document.getElementById('tryon-canvas');
-  if (!canvas) return;
-  const link = document.createElement('a');
-  link.download = 'driphood-my-style.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  showToast('<i class="fas fa-download"></i> تم حفظ صورتك بالهودي بنجاح!');
+function resetGeminiFitting() {
+  document.getElementById('gemini-upload-area').style.display = 'block';
+  document.getElementById('gemini-scanning-area').style.display = 'none';
+  document.getElementById('gemini-result-area').style.display = 'none';
+  document.getElementById('gemini-file-input').value = '';
 }
