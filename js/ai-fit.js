@@ -6,7 +6,7 @@
 const GEMINI_API_KEY = atob("QVEuQWI4Uk42TDIteUpMR2dqS3NvcGxzV1RGRmFlN0JYR3ZGTXh3cFJTNldLekkyX3JVcnc=");
 const GEMINI_MODEL = "gemini-3-flash-preview";
 
-// --- 1. مستشار المقاس الذكي الحقيقي (Google Gemini AI) ---
+// --- 1. مستشار المقاس الذكي (Google Gemini AI) ---
 function openAiFitModal() {
   const modal = document.getElementById('ai-fit-modal');
   if (modal) {
@@ -73,14 +73,11 @@ async function calculateAiSize() {
       })
     });
 
-    if (!response.ok) {
-      throw new Error(`Gemini API Error: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Gemini API Error: ${response.status}`);
 
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // استخراج المقاس من رد جيمناي
     let detectedSize = 'L';
     if (rawText.includes('XXL') || rawText.includes('مقاس XXL')) detectedSize = 'XXL';
     else if (rawText.includes('XL') || rawText.includes('مقاس XL')) detectedSize = 'XL';
@@ -88,7 +85,6 @@ async function calculateAiSize() {
     else if (rawText.includes('مقاس M') || rawText.includes(' M ')) detectedSize = 'M';
     else if (rawText.includes('مقاس S') || rawText.includes(' S ')) detectedSize = 'S';
 
-    // تنسيق النص وشرح جيمناي
     let cleanText = rawText
       .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
       .replace(/\n\n/g, '<br><br>')
@@ -98,7 +94,6 @@ async function calculateAiSize() {
 
   } catch (err) {
     console.warn("Falling back to local sizing algorithm:", err);
-    // خوارزمية احتياطية في حال انقطاع النت
     let fallbackSize = 'L';
     if (weight <= 62) fallbackSize = 'S';
     else if (weight <= 72) fallbackSize = 'M';
@@ -121,7 +116,7 @@ function displayAiResult(recommendedSize, explanationHtml, isGeminiPowered) {
 
   sizeBadge.textContent = recommendedSize;
   confidenceText.innerHTML = isGeminiPowered 
-    ? `<i class="fas fa-sparkles"></i> محلل بواسطة Google Gemini AI` 
+    ? `<i class="fas fa-sparkles"></i> استشارة ذكية من Google Gemini AI` 
     : `دقة التطابق 97%`;
 
   explanationText.innerHTML = explanationHtml;
@@ -144,7 +139,7 @@ function applyAiSizeToProduct() {
   showToast(`<i class="fas fa-robot"></i> تم تطبيق مقاس (${targetSize}) الموصى به من Google Gemini!`);
 }
 
-// --- 2. محرك غرفة القياس الافتراضية بالهودي المفرغ فائق الدقة ---
+// --- 2. محرك غرفة القياس وفحص الصورة بـ Google Gemini Vision ---
 function createRealisticHoodieSvg(colorHex, accentHex) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 520" width="500" height="520">
     <defs>
@@ -313,33 +308,76 @@ function setupCanvasInteractions(canvas) {
   canvas.ontouchend = () => { isDragging = false; };
 }
 
-function handleUserPhotoUpload(event) {
+// دالة رفع الصورة وفحصها بالذكاء الاصطناعي بواسطة Google Gemini Vision
+async function handleUserPhotoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
+  const scanOverlay = document.getElementById('tryon-scan-overlay');
+  const placeholder = document.getElementById('tryon-placeholder');
+  const canvas = document.getElementById('tryon-canvas');
+  const controls = document.getElementById('tryon-controls-panel');
+  const geminiBox = document.getElementById('gemini-photo-analysis');
+
+  if (placeholder) placeholder.style.display = 'none';
+  if (scanOverlay) scanOverlay.style.display = 'flex';
+
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
+    const base64Data = e.target.result.split(',')[1];
+    const mimeType = file.type || 'image/jpeg';
+
     userPhotoImg = new Image();
     userPhotoImg.onload = () => {
-      const scanOverlay = document.getElementById('tryon-scan-overlay');
-      const placeholder = document.getElementById('tryon-placeholder');
-      const canvas = document.getElementById('tryon-canvas');
-      const controls = document.getElementById('tryon-controls-panel');
+      if (scanOverlay) scanOverlay.style.display = 'none';
+      if (canvas) canvas.style.display = 'block';
+      if (controls) controls.style.display = 'block';
 
-      if (placeholder) placeholder.style.display = 'none';
-      if (scanOverlay) scanOverlay.style.display = 'flex';
-
-      setTimeout(() => {
-        if (scanOverlay) scanOverlay.style.display = 'none';
-        if (canvas) canvas.style.display = 'block';
-        if (controls) controls.style.display = 'block';
-
-        initTryOnCanvas();
-        autoFitGarmentToBody();
-        showToast('<i class="fas fa-check-circle"></i> تم فحص وتلبيس الهودي بنجاح! اسحب الهودي لضبطه بالملي.');
-      }, 1400);
+      initTryOnCanvas();
+      autoFitGarmentToBody();
+      showToast('<i class="fas fa-check-circle"></i> تم فحص صورتك وتلبيس الهودي بنجاح!');
     };
     userPhotoImg.src = e.target.result;
+
+    // إرسال الصورة لـ Google Gemini Vision لتحليل المظهر
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64Data
+                }
+              },
+              {
+                text: "أنت خبير مظهر وأزياء لبراند ملابس مصري راقي DripHood. افحص صورة هذا الشاب: علق على بنيته وعرض كتافه في سطرين باللهجة المصرية الراقية، واقترح له أنسب مقاس هودي له (غالباً L أو XL لو أوفرسايز) وأحسن لون هودي يليق على بشرته ولَبسه."
+              }
+            ]
+          }]
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (analysis && geminiBox) {
+          geminiBox.innerHTML = `
+            <div style="background: linear-gradient(135deg, #16182e 0%, #202447 100%); color: #fff; padding: 15px; border-radius: 10px; margin-top: 15px; border-right: 4px solid var(--accent); font-size: 0.88rem; line-height: 1.7;">
+              <div style="color: var(--accent); font-weight: 800; margin-bottom: 5px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-sparkles"></i> تقييم مظهرك من Google Gemini AI:
+              </div>
+              <div>${analysis.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>
+            </div>`;
+          geminiBox.style.display = 'block';
+        }
+      }
+    } catch (err) {
+      console.warn("Gemini vision analysis skipped:", err);
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -431,4 +469,3 @@ function downloadTryOnImage() {
   link.click();
   showToast('<i class="fas fa-download"></i> تم حفظ صورتك بالهودي بنجاح!');
 }
-
