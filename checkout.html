@@ -177,88 +177,140 @@
 <script>
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxsMhPhFp7dlLmQGovp3YDz-nmsGvEHBSm5UMTqjVZ7P_XbkDkltCffDs4CA20UwY8r/exec';
 
-document.addEventListener("DOMContentLoaded", function() {
-  // Show cart items
+function refreshCheckoutSummary() {
+  const currentCart = JSON.parse(localStorage.getItem('store-cart')) || cart || [];
   const list = document.getElementById("checkout-items-list");
+  
   if (list) {
-    if (cart.length === 0) {
-      list.innerHTML = "<p style=\"color:#999;text-align:center\">السلة فارغة</p>";
+    if (currentCart.length === 0) {
+      list.innerHTML = "<p style=\"color:#888;text-align:center;padding:10px\">السلة فارغة</p>";
     } else {
-      list.innerHTML = cart.map(item =>
-        `<div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span>${item.name} × ${item.qty}</span>
-          <span>${formatPrice(item.price * item.qty)}</span>
-        </div>`
-      ).join("");
+      list.innerHTML = currentCart.map(item => {
+        const meta = [item.size ? `مقاس: ${item.size}` : '', item.color ? `لون: ${item.color}` : ''].filter(Boolean).join(' | ');
+        return `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed #eee">
+            <div>
+              <strong style="display:block;font-size:0.92rem;color:#1a1a2e">${item.name}</strong>
+              <div style="font-size:0.8rem;color:#777;margin-top:2px">
+                ${meta ? meta + ' • ' : ''}الكمية: ${item.qty}
+              </div>
+            </div>
+            <span style="font-weight:700;color:#c8a96e;white-space:nowrap">${formatPrice(item.price * item.qty)}</span>
+          </div>`;
+      }).join("");
     }
   }
 
-  // Payment method highlight
+  const subtotal = currentCart.reduce((s, i) => s + (i.price * i.qty), 0);
+  const shipping = subtotal > 0 ? (subtotal >= 500 ? 0 : 50) : 0;
+  const total = subtotal + shipping;
+
+  const subtotalEl = document.getElementById('summary-subtotal');
+  const shippingEl = document.getElementById('summary-shipping');
+  const totalEl = document.getElementById('checkout-total');
+
+  if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
+  if (shippingEl) shippingEl.textContent = shipping === 0 ? (subtotal > 0 ? 'مجاني' : '0 ج.م') : formatPrice(shipping);
+  if (totalEl) totalEl.textContent = formatPrice(total);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  refreshCheckoutSummary();
+
+  // Payment method selection
   document.querySelectorAll(".payment-method").forEach(m => {
     m.addEventListener("click", function() {
       document.querySelectorAll(".payment-method").forEach(x => x.classList.remove("selected"));
       this.classList.add("selected");
+      const radio = this.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
     });
   });
 
   // Form submit → send to Google Sheets
-  document.getElementById("checkout-form").addEventListener("submit", async function(e) {
-    e.preventDefault();
+  const checkoutForm = document.getElementById("checkout-form");
+  if (checkoutForm) {
+    checkoutForm.addEventListener("submit", async function(e) {
+      e.preventDefault();
 
-    const btn = document.getElementById("place-order-btn");
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+      const currentCart = JSON.parse(localStorage.getItem('store-cart')) || cart || [];
+      if (!currentCart || currentCart.length === 0) {
+        alert("سلتك فارغة! يرجى إضافة منتجات إلى السلة أولاً قبل إتمام الطلب.");
+        window.location.href = "shop.html";
+        return;
+      }
 
-    const firstName = document.getElementById("inp-firstname").value.trim();
-    const lastName  = document.getElementById("inp-lastname").value.trim();
-    const phone     = document.getElementById("inp-phone").value.trim();
-    const email     = document.getElementById("inp-email").value.trim();
-    const gov       = document.getElementById("inp-gov").value;
-    const city      = document.getElementById("inp-city").value.trim();
-    const address   = document.getElementById("inp-address").value.trim();
-    const notes     = document.getElementById("inp-notes").value.trim();
-    const payment   = document.querySelector('input[name="payment"]:checked').value;
+      const btn = document.getElementById("place-order-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري حفظ الطلب...';
 
-    const subtotal  = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const total     = subtotal + 50;
+      const firstName = document.getElementById("inp-firstname").value.trim();
+      const lastName  = document.getElementById("inp-lastname").value.trim();
+      const phone     = document.getElementById("inp-phone").value.trim();
+      const email     = document.getElementById("inp-email").value.trim();
+      const gov       = document.getElementById("inp-gov").value;
+      const city      = document.getElementById("inp-city").value.trim();
+      const address   = document.getElementById("inp-address").value.trim();
+      const notes     = document.getElementById("inp-notes").value.trim();
+      const paymentEl = document.querySelector('input[name="payment"]:checked');
+      const payment   = paymentEl ? paymentEl.value : 'الدفع عند الاستلام';
 
-    const productsStr = cart.map(i => `${i.name} (${i.size||''}) ×${i.qty} — ${i.price}ج`).join(' | ');
+      const subtotal  = currentCart.reduce((s, i) => s + i.price * i.qty, 0);
+      const shipping  = subtotal >= 500 ? 0 : 50;
+      const total     = subtotal + shipping;
 
-    const orderNum = 'DH' + Date.now().toString().slice(-6);
+      // Format products list clearly for Google Sheets
+      const productsStr = currentCart.map((i, idx) => {
+        let details = [];
+        if (i.size) details.push(`مقاس: ${i.size}`);
+        if (i.color) details.push(`لون: ${i.color}`);
+        const detailsStr = details.length > 0 ? ` (${details.join(' - ')})` : '';
+        return `${idx + 1}- ${i.name}${detailsStr} [الكمية: ${i.qty}] = ${i.price * i.qty} ج.م`;
+      }).join('\n');
 
-    const payload = {
-      name: firstName + ' ' + lastName,
-      phone: phone,
-      email: email,
-      address: address,
-      city: gov + ' - ' + city,
-      products: productsStr,
-      total: total + ' ج.م',
-      payment: payment,
-      notes: notes,
-      orderNum: orderNum
-    };
+      const orderNum = 'DH' + Date.now().toString().slice(-6);
 
-    try {
-      await fetch(SHEETS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
-    } catch(err) {
-      console.log('Sheets error:', err);
-    }
+      const payload = {
+        name: firstName + ' ' + lastName,
+        phone: phone,
+        email: email,
+        address: address,
+        city: gov + (city ? ' - ' + city : ''),
+        products: productsStr,
+        total: total + ' ج.م',
+        payment: payment,
+        notes: notes,
+        orderNum: orderNum
+      };
 
-    // Show success
-    document.getElementById("order-number-display").textContent = '#' + orderNum;
-    document.getElementById("success-modal").style.display = "flex";
-    localStorage.removeItem("store-cart");
+      try {
+        await fetch(SHEETS_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+      } catch(err) {
+        console.warn('Sheets fetch error:', err);
+      }
 
-    document.getElementById("success-btn").addEventListener("click", function() {
-      window.location.href = "index.html";
+      // Success modal
+      document.getElementById("order-number-display").textContent = '#' + orderNum;
+      document.getElementById("success-modal").style.display = "flex";
+
+      // Clear cart AFTER preparing and sending payload
+      localStorage.removeItem("store-cart");
+      cart = [];
+      updateCartBadge();
+
+      const successBtn = document.getElementById("success-btn");
+      if (successBtn) {
+        successBtn.onclick = function() {
+          window.location.href = "index.html";
+        };
+      }
     });
-  });
+  }
 });
 </script>
 </body>
