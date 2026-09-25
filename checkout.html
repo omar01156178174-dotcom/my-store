@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إتمام الطلب - ستايل مان</title>
+<title>إتمام الطلب - DripHood</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -14,7 +14,7 @@
     <div class="navbar-inner">
       <a href="index.html" class="navbar-logo">
         <div class="logo-icon"><i class="fas fa-tshirt"></i></div>
-        <div class="logo-text"><strong>ستايل مان</strong><span>STYLE MAN</span></div>
+        <div class="logo-text"><strong>DripHood</strong><span>دريب هود</span></div>
       </a>
       <div class="navbar-actions">
         <a href="cart.html" class="nav-icon-btn">
@@ -53,23 +53,23 @@
             <div class="form-grid">
               <div class="form-group">
                 <label>الاسم الأول *</label>
-                <input type="text" placeholder="محمد" required>
+                <input id="inp-firstname" type="text" placeholder="محمد" required>
               </div>
               <div class="form-group">
                 <label>الاسم الأخير *</label>
-                <input type="text" placeholder="أحمد" required>
+                <input id="inp-lastname" type="text" placeholder="أحمد" required>
               </div>
               <div class="form-group">
                 <label>رقم الهاتف *</label>
-                <input type="tel" placeholder="01xxxxxxxxx" required>
+                <input id="inp-phone" type="tel" placeholder="01xxxxxxxxx" required>
               </div>
               <div class="form-group">
                 <label>البريد الإلكتروني</label>
-                <input type="email" placeholder="example@email.com">
+                <input id="inp-email" type="email" placeholder="example@email.com">
               </div>
               <div class="form-group">
                 <label>المحافظة *</label>
-                <select required>
+                <select id="inp-gov" required>
                   <option value="">اختر المحافظة</option>
                   <option>القاهرة</option>
                   <option>الجيزة</option>
@@ -85,15 +85,15 @@
               </div>
               <div class="form-group">
                 <label>المدينة / المنطقة *</label>
-                <input type="text" placeholder="المدينة" required>
+                <input id="inp-city" type="text" placeholder="المدينة" required>
               </div>
               <div class="form-group full-width">
                 <label>العنوان بالتفصيل *</label>
-                <input type="text" placeholder="اسم الشارع، رقم المبنى، الشقة" required>
+                <input id="inp-address" type="text" placeholder="اسم الشارع، رقم المبنى، الشقة" required>
               </div>
               <div class="form-group full-width">
                 <label>ملاحظات إضافية</label>
-                <textarea rows="3" placeholder="أي تعليمات خاصة للتوصيل..."></textarea>
+                <textarea id="inp-notes" rows="3" placeholder="أي تعليمات خاصة للتوصيل..."></textarea>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@
           <div class="step-body">
             <div class="payment-methods">
               <label class="payment-method selected">
-                <input type="radio" name="payment" value="cod" checked>
+                <input type="radio" name="payment" value="الدفع عند الاستلام" checked>
                 <span class="payment-icon">💵</span>
                 <div class="payment-method-info">
                   <strong>الدفع عند الاستلام</strong>
@@ -114,7 +114,7 @@
                 </div>
               </label>
               <label class="payment-method">
-                <input type="radio" name="payment" value="fawry">
+                <input type="radio" name="payment" value="فوري">
                 <span class="payment-icon">💳</span>
                 <div class="payment-method-info">
                   <strong>فوري</strong>
@@ -122,7 +122,7 @@
                 </div>
               </label>
               <label class="payment-method">
-                <input type="radio" name="payment" value="vodafone">
+                <input type="radio" name="payment" value="فودافون كاش">
                 <span class="payment-icon">📱</span>
                 <div class="payment-method-info">
                   <strong>فودافون كاش / انستا باي</strong>
@@ -133,7 +133,7 @@
           </div>
         </div>
         <div class="step-body">
-          <button type="submit" class="btn btn-primary place-order-btn">
+          <button type="submit" class="btn btn-primary place-order-btn" id="place-order-btn">
             <i class="fas fa-check-circle"></i> تأكيد الطلب
           </button>
         </div>
@@ -160,7 +160,7 @@
   <div class="success-modal-content">
     <div class="success-icon"><i class="fas fa-check"></i></div>
     <h2>تم تأكيد طلبك! 🎉</h2>
-    <p>شكراً لثقتك في ستايل مان! سيتم التواصل معك خلال 24 ساعة لتأكيد موعد التوصيل.</p>
+    <p>شكراً لثقتك في DripHood! سيتم التواصل معك خلال 24 ساعة لتأكيد موعد التوصيل.</p>
     <div class="order-number">
       <strong>رقم الطلب: </strong>
       <span id="order-number-display">#000000</span>
@@ -175,7 +175,10 @@
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
 <script>
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxsMhPhFp7dlLmQGovp3YDz-nmsGvEHBSm5UMTqjVZ7P_XbkDkltCffDs4CA20UwY8r/exec';
+
 document.addEventListener("DOMContentLoaded", function() {
+  // Show cart items
   const list = document.getElementById("checkout-items-list");
   if (list) {
     if (cart.length === 0) {
@@ -189,10 +192,71 @@ document.addEventListener("DOMContentLoaded", function() {
       ).join("");
     }
   }
+
+  // Payment method highlight
   document.querySelectorAll(".payment-method").forEach(m => {
     m.addEventListener("click", function() {
       document.querySelectorAll(".payment-method").forEach(x => x.classList.remove("selected"));
       this.classList.add("selected");
+    });
+  });
+
+  // Form submit → send to Google Sheets
+  document.getElementById("checkout-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("place-order-btn");
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
+    const firstName = document.getElementById("inp-firstname").value.trim();
+    const lastName  = document.getElementById("inp-lastname").value.trim();
+    const phone     = document.getElementById("inp-phone").value.trim();
+    const email     = document.getElementById("inp-email").value.trim();
+    const gov       = document.getElementById("inp-gov").value;
+    const city      = document.getElementById("inp-city").value.trim();
+    const address   = document.getElementById("inp-address").value.trim();
+    const notes     = document.getElementById("inp-notes").value.trim();
+    const payment   = document.querySelector('input[name="payment"]:checked').value;
+
+    const subtotal  = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const total     = subtotal + 50;
+
+    const productsStr = cart.map(i => `${i.name} (${i.size||''}) ×${i.qty} — ${i.price}ج`).join(' | ');
+
+    const orderNum = 'DH' + Date.now().toString().slice(-6);
+
+    const payload = {
+      name: firstName + ' ' + lastName,
+      phone: phone,
+      email: email,
+      address: address,
+      city: gov + ' - ' + city,
+      products: productsStr,
+      total: total + ' ج.م',
+      payment: payment,
+      notes: notes,
+      orderNum: orderNum
+    };
+
+    try {
+      await fetch(SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(err) {
+      console.log('Sheets error:', err);
+    }
+
+    // Show success
+    document.getElementById("order-number-display").textContent = '#' + orderNum;
+    document.getElementById("success-modal").style.display = "flex";
+    localStorage.removeItem("store-cart");
+
+    document.getElementById("success-btn").addEventListener("click", function() {
+      window.location.href = "index.html";
     });
   });
 });
