@@ -123,4 +123,5 @@ function showToast(message, duration = 3000) {
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   renderCart();
+  updateSummary();
 });
