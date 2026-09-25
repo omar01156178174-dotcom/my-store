@@ -82,29 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Checkout form
-  const checkoutForm = document.getElementById('checkout-form');
-  if (checkoutForm) {
-    checkoutForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const orderNum = 'ORD-' + Math.floor(Math.random() * 900000 + 100000);
-      const el = document.getElementById('order-number-display');
-      if (el) el.textContent = orderNum;
-      const modal = document.getElementById('success-modal');
-      if (modal) modal.classList.add('active');
-      localStorage.removeItem('store-cart');
-      cart = [];
-      updateCartBadge();
-    });
-  }
 
-  // Success modal close
-  const successBtn = document.getElementById('success-btn');
-  if (successBtn) {
-    successBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-  }
 
   // Scroll to top button
   const scrollBtn = document.createElement('button');
