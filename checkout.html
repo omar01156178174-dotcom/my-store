@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>إتمام الطلب - DripHood</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=30">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -143,9 +146,9 @@
         <div class="order-summary-header">ملخص طلبك</div>
         <div class="order-summary-body">
           <div id="checkout-items-list" style="margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #eee;font-size:0.9rem"></div>
-          <div class="summary-row"><span>المجموع الجزئي</span><span id="summary-subtotal">0 ج.م</span></div>
+          <div class="summary-row"><span>المجموع الجزئي</span><span id="summary-subtotal">--</span></div>
           <div class="summary-row"><span>الشحن</span><span id="summary-shipping">50 ج.م</span></div>
-          <div class="summary-row total"><span>الإجمالي</span><span id="checkout-total">0 ج.م</span></div>
+          <div class="summary-row total"><span>الإجمالي</span><span id="checkout-total">--</span></div>
           <div style="margin-top:20px;padding:15px;background:#f8f8f8;border-radius:8px;font-size:0.82rem;color:#666">
             <i class="fas fa-shield-alt" style="color:#28a745"></i> جميع بياناتك محمية ومشفرة
           </div>
@@ -160,7 +163,7 @@
   <div class="success-modal-content">
     <div class="success-icon"><i class="fas fa-check"></i></div>
     <h2>تم تأكيد طلبك! 🎉</h2>
-    <p>شكراً لثقتك في DripHood! سيتم التواصل معك خلال 24 ساعة لتأكيد موعد التوصيل.</p>
+    <p>شكراً لثقتك في DripHood! تم استلام طلبك وتسجيله بنجاح، وسيتم التواصل معك لتأكيد موعد التوصيل.</p>
     <div class="order-number">
       <strong>رقم الطلب: </strong>
       <span id="order-number-display">#000000</span>
@@ -171,53 +174,75 @@
   </div>
 </div>
 
-<script src="js/products.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/main.js"></script>
+<script src="js/products.js?v=30"></script>
+<script src="js/cart.js?v=30"></script>
+<script src="js/main.js?v=30"></script>
 <script>
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxsMhPhFp7dlLmQGovp3YDz-nmsGvEHBSm5UMTqjVZ7P_XbkDkltCffDs4CA20UwY8r/exec';
 
-function refreshCheckoutSummary() {
-  const currentCart = JSON.parse(localStorage.getItem('store-cart')) || cart || [];
-  const list = document.getElementById("checkout-items-list");
-  
-  if (list) {
-    if (currentCart.length === 0) {
-      list.innerHTML = "<p style=\"color:#888;text-align:center;padding:10px\">السلة فارغة</p>";
-    } else {
-      list.innerHTML = currentCart.map(item => {
-        const meta = [item.size ? `مقاس: ${item.size}` : '', item.color ? `لون: ${item.color}` : ''].filter(Boolean).join(' | ');
-        return `
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed #eee">
-            <div>
-              <strong style="display:block;font-size:0.92rem;color:#1a1a2e">${item.name}</strong>
-              <div style="font-size:0.8rem;color:#777;margin-top:2px">
-                ${meta ? meta + ' • ' : ''}الكمية: ${item.qty}
-              </div>
-            </div>
-            <span style="font-weight:700;color:#c8a96e;white-space:nowrap">${formatPrice(item.price * item.qty)}</span>
-          </div>`;
-      }).join("");
-    }
+function renderCheckoutSummary() {
+  let cartData = [];
+  try {
+    cartData = JSON.parse(localStorage.getItem('store-cart')) || [];
+  } catch(e) {
+    cartData = [];
   }
 
-  const subtotal = currentCart.reduce((s, i) => s + (i.price * i.qty), 0);
-  const shipping = subtotal > 0 ? (subtotal >= 500 ? 0 : 50) : 0;
-  const total = subtotal + shipping;
+  const listEl = document.getElementById("checkout-items-list");
+  const subtotalEl = document.getElementById("summary-subtotal");
+  const shippingEl = document.getElementById("summary-shipping");
+  const totalEl = document.getElementById("checkout-total");
 
-  const subtotalEl = document.getElementById('summary-subtotal');
-  const shippingEl = document.getElementById('summary-shipping');
-  const totalEl = document.getElementById('checkout-total');
+  if (!cartData || cartData.length === 0) {
+    if (listEl) listEl.innerHTML = '<p style="color:#888;text-align:center;padding:15px">السلة فارغة</p>';
+    if (subtotalEl) subtotalEl.textContent = '0 ج.م';
+    if (shippingEl) shippingEl.textContent = '0 ج.م';
+    if (totalEl) totalEl.textContent = '0 ج.م';
+    return;
+  }
 
-  if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
-  if (shippingEl) shippingEl.textContent = shipping === 0 ? (subtotal > 0 ? 'مجاني' : '0 ج.م') : formatPrice(shipping);
-  if (totalEl) totalEl.textContent = formatPrice(total);
+  // Render items list
+  if (listEl) {
+    listEl.innerHTML = cartData.map(item => {
+      const priceNum = Number(item.price) || 0;
+      const qtyNum = Number(item.qty) || 1;
+      const itemTotal = priceNum * qtyNum;
+      const meta = [
+        item.size ? `مقاس: ${item.size}` : '',
+        item.color ? `لون: ${item.color}` : ''
+      ].filter(Boolean).join(' | ');
+
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed #e2e8f0">
+          <div>
+            <div style="font-weight:700;color:#1a1a2e;font-size:0.95rem">${item.name}</div>
+            <div style="font-size:0.8rem;color:#64748b;margin-top:3px">
+              ${meta ? meta + ' • ' : ''}الكمية: ${qtyNum}
+            </div>
+          </div>
+          <span style="font-weight:800;color:#c8a96e;font-size:0.95rem;white-space:nowrap">${itemTotal.toLocaleString('ar-EG')} ج.م</span>
+        </div>`;
+    }).join('');
+  }
+
+  const subtotal = cartData.reduce((sum, item) => {
+    const p = Number(item.price) || 0;
+    const q = Number(item.qty) || 1;
+    return sum + (p * q);
+  }, 0);
+
+  const shipping = subtotal >= 500 ? 0 : 50;
+  const grandTotal = subtotal + shipping;
+
+  if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('ar-EG') + ' ج.م';
+  if (shippingEl) shippingEl.textContent = shipping === 0 ? 'مجاني' : '50 ج.م';
+  if (totalEl) totalEl.textContent = grandTotal.toLocaleString('ar-EG') + ' ج.م';
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  refreshCheckoutSummary();
+function initCheckoutPage() {
+  renderCheckoutSummary();
 
-  // Payment method selection
+  // Highlight payment method on click
   document.querySelectorAll(".payment-method").forEach(m => {
     m.addEventListener("click", function() {
       document.querySelectorAll(".payment-method").forEach(x => x.classList.remove("selected"));
@@ -227,14 +252,20 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  // Form submit → send to Google Sheets
+  // Handle form submission
   const checkoutForm = document.getElementById("checkout-form");
   if (checkoutForm) {
-    checkoutForm.addEventListener("submit", async function(e) {
+    checkoutForm.onsubmit = async function(e) {
       e.preventDefault();
 
-      const currentCart = JSON.parse(localStorage.getItem('store-cart')) || cart || [];
-      if (!currentCart || currentCart.length === 0) {
+      let cartData = [];
+      try {
+        cartData = JSON.parse(localStorage.getItem('store-cart')) || [];
+      } catch(e) {
+        cartData = [];
+      }
+
+      if (!cartData || cartData.length === 0) {
         alert("سلتك فارغة! يرجى إضافة منتجات إلى السلة أولاً قبل إتمام الطلب.");
         window.location.href = "shop.html";
         return;
@@ -242,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
       const btn = document.getElementById("place-order-btn");
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري حفظ الطلب...';
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري حفظ الطلب في النظام...';
 
       const firstName = document.getElementById("inp-firstname").value.trim();
       const lastName  = document.getElementById("inp-lastname").value.trim();
@@ -255,17 +286,18 @@ document.addEventListener("DOMContentLoaded", function() {
       const paymentEl = document.querySelector('input[name="payment"]:checked');
       const payment   = paymentEl ? paymentEl.value : 'الدفع عند الاستلام';
 
-      const subtotal  = currentCart.reduce((s, i) => s + i.price * i.qty, 0);
+      const subtotal  = cartData.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.qty) || 1)), 0);
       const shipping  = subtotal >= 500 ? 0 : 50;
-      const total     = subtotal + shipping;
+      const grandTotal = subtotal + shipping;
 
-      // Format products list clearly for Google Sheets
-      const productsStr = currentCart.map((i, idx) => {
+      const productsStr = cartData.map((i, idx) => {
         let details = [];
         if (i.size) details.push(`مقاس: ${i.size}`);
         if (i.color) details.push(`لون: ${i.color}`);
         const detailsStr = details.length > 0 ? ` (${details.join(' - ')})` : '';
-        return `${idx + 1}- ${i.name}${detailsStr} [الكمية: ${i.qty}] = ${i.price * i.qty} ج.م`;
+        const p = Number(i.price) || 0;
+        const q = Number(i.qty) || 1;
+        return `${idx + 1}- ${i.name}${detailsStr} [الكمية: ${q}] = ${(p * q).toLocaleString('ar-EG')} ج.م`;
       }).join('\n');
 
       const orderNum = 'DH' + Date.now().toString().slice(-6);
@@ -277,7 +309,7 @@ document.addEventListener("DOMContentLoaded", function() {
         address: address,
         city: gov + (city ? ' - ' + city : ''),
         products: productsStr,
-        total: total + ' ج.م',
+        total: grandTotal.toLocaleString('ar-EG') + ' ج.م',
         payment: payment,
         notes: notes,
         orderNum: orderNum
@@ -291,17 +323,16 @@ document.addEventListener("DOMContentLoaded", function() {
           body: JSON.stringify(payload)
         });
       } catch(err) {
-        console.warn('Sheets fetch error:', err);
+        console.warn('Sheets fetch warning:', err);
       }
 
-      // Success modal
+      // Show success modal
       document.getElementById("order-number-display").textContent = '#' + orderNum;
       document.getElementById("success-modal").style.display = "flex";
 
-      // Clear cart AFTER preparing and sending payload
+      // Clear cart
       localStorage.removeItem("store-cart");
-      cart = [];
-      updateCartBadge();
+      if (typeof updateCartBadge === 'function') updateCartBadge();
 
       const successBtn = document.getElementById("success-btn");
       if (successBtn) {
@@ -309,9 +340,18 @@ document.addEventListener("DOMContentLoaded", function() {
           window.location.href = "index.html";
         };
       }
-    });
+    };
   }
-});
+}
+
+// Run immediately and also on events
+renderCheckoutSummary();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCheckoutPage);
+} else {
+  initCheckoutPage();
+}
+window.addEventListener('load', renderCheckoutSummary);
 </script>
 </body>
 </html>
